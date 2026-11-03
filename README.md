@@ -19,3 +19,11 @@ The agent needs [Ollama](https://ollama.com) running locally with the model pull
 ```
 uv run agent "Take this dish from the kitchen to the terrace"
 ```
+
+3D visualization (extra): export the routes of both tables and the agent cases, then open the page in a browser (it loads Three.js from a CDN, so it needs internet):
+
+```
+uv run export-viz   # -> viz/data.js (q_table.npy is only read)
+```
+
+Open `viz/index.html` (double click). Modes: Route, Policy, Agent, Compare α; `viz/index.html#compare` opens a mode directly.

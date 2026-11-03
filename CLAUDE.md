@@ -110,8 +110,8 @@ Docstrings and error messages in English. The table is loaded once with `np.load
 
 ## Code rules
 - uv application project, Python pinned with `uv python pin 3.14`. `pyproject.toml`, `uv.lock` and `.python-version` are committed.
-- Package `src/waiter_robot/`: `env.py`, `q_table.py`, `train.py`, `evaluate.py`, `experiment.py`, `tools.py`, `agent.py`.
-- Entry points in `[project.scripts]`: `uv run train`, `uv run evaluate`, `uv run experiment`, `uv run agent "<request>"`.
+- Package `src/waiter_robot/`: `env.py`, `q_table.py`, `train.py`, `evaluate.py`, `experiment.py`, `tools.py`, `agent.py`, `export_viz.py`.
+- Entry points in `[project.scripts]`: `uv run train`, `uv run evaluate`, `uv run experiment`, `uv run agent "<request>"`, `uv run export-viz`.
 - Dependencies: `numpy`, `gymnasium`, `matplotlib`, `langchain`, `langchain-ollama`; dev: `pytest`. Nothing else without asking.
 - Every command runs from the project root; `data/map.txt` and `q_table.npy` live there.
 - Everything in English: code, docstrings, messages, README. Type hints on every function.
@@ -133,3 +133,18 @@ Each milestone has a command in `.claude/commands/`; it is closed when its crite
 | H5 | `/agent` | `agent.py`, `tests/scripted_model.py`, `tests/test_agent.py` | case 1 end to end with the double; case 4 does not call `run_policy` |
 | H6 | `/evaluate-agent` | `results/cases.md`, `results/traces/` | table of the four cases with the real model; two full traces |
 | H7 | `/final-check` | `informe.pdf` (written by the student) | clean clone + README commands work; no keys in the zip |
+| H8 | `/visualize` | `export_viz.py`, `viz/index.html`, `viz/data.js`, `tests/test_viz.py` | export tests pass; the page shows the four modes |
+
+## 3D visualization (extra, H8)
+- Not required by the assignment: it shows the trained policy and the agent cases. It never retrains `q_table.npy` and never calls the LLM.
+- `uv run export-viz` writes `viz/data.js` (`window.VIZ_DATA = {...}`), so `viz/index.html` opens from disk with no server. It contains:
+  - the map, the places and the BFS distance of every (origin, destination) pair;
+  - for α = 0.5 (`q_table.npy`) and α = 0.1 (trained in memory: 3000 episodes, seed 0): the best action of every free cell for each destination, and the route of the 117 pairs (`steps`, `return`, `path`, shortest yes/no);
+  - the four agent cases from `results/traces/case1-4.txt`: request, tools called, final answer and the `run_policy` result if there is one.
+- Routes come from `rollout(table, ...)` in `tools.py`, the same loop `run_policy` uses; `run_policy`'s behaviour and description do not change.
+- `viz/index.html`: Three.js 0.160.0 from a CDN. The restaurant in 3D (tables, fryer area, kitchen, bar, terrace door) and a robot that moves cell by cell. Four modes:
+  1. Route: pick a destination and click a start cell; shows steps, return and whether it is the shortest route; table α = 0.5 or 0.1.
+  2. Policy: an arrow on every free cell with its best action for the chosen destination and table.
+  3. Agent: the four requests with expected and called tools and the answer; the robot plays the `run_policy` route when there is one.
+  4. Compare α: two robots, α = 0.5 and α = 0.1, from the same start (default: bar → kitchen, 12 vs 16 steps).
+- Tests (`tests/test_viz.py`): 117 routes per table, all shortest for α = 0.5; α = 0.1 from the bar to the kitchen takes more than 12 steps; case 1 has `run_policy(0, 0, "T")` with 13 steps; the export does not change `q_table.npy`.

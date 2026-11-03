@@ -96,13 +96,21 @@ def run_policy(start_row: int, start_col: int, destination: str) -> dict:
             destination is not a place letter; or the start is the destination.
     """
     _validate(start_row, start_col, destination)
+    return rollout(QTABLE, start_row, start_col, destination)
+
+
+def rollout(table: QTable, start_row: int, start_col: int, destination: str) -> dict:
+    """Follow `table.best_action` from the start cell; same result format as `run_policy`.
+
+    The start and destination must already be valid. The table is only read.
+    """
     s, _ = ENV.reset(options={"start": (start_row, start_col), "destination": destination})
     path = [_cell(s)]
     total = 0.0
     reached = False
     done = False
     while not done:
-        s, r, terminated, truncated, _ = ENV.step(QTABLE.best_action(s))
+        s, r, terminated, truncated, _ = ENV.step(table.best_action(s))
         path.append(_cell(s))
         total += float(r)
         reached = terminated and r == GOAL_REWARD
