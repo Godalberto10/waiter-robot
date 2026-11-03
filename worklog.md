@@ -35,3 +35,11 @@ Accepted: `src/waiter_robot/q_table.py` (Session 5 `QTable` from `codigo-tema-3.
 Rejected: nothing.
 Correction requested: H2 had no tests; reproducibility and "evaluation does not change the table" had only been checked by hand (md5). Added `tests/test_train.py`: two trainers with seed 0 give identical tables, and `shortest_routes` leaves the table unchanged and returns (117, 117).
 Closing check: `uv run evaluate` → `shortest routes: 117/117 (100.0 %)` (criterion: at least 112); `uv run pytest` → 19 passed.
+
+## H3 · experiment (2026-11-03)
+
+Command: /experiment
+Accepted: `src/waiter_robot/experiment.py` (`uv run experiment`), which reuses `WaiterTrainer` and `shortest_routes` (no copied loop) and trains α = 0.5 and α = 0.1 (γ = 0.9, seed 0) for 3000 episodes, evaluating the 117 pairs after each block of 100; `results/experiment.png` with one curve per α and the 95 % line; the `experiment` entry point and its README line.
+Rejected: nothing.
+Correction requested: none.
+Closing check: plot with two curves (30 points each). Output: α = 0.5 first reaches 95 % at block 9 (900 episodes) and stays at 100 % from 1200; α = 0.1 never reaches 95 % (peak 90.6 %, final 86.3 %). `q_table.npy` unchanged (same md5); `uv run pytest` → 19 passed.
