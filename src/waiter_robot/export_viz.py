@@ -95,12 +95,14 @@ def build() -> dict:
     slow.train(EPISODES)  # in memory only
     bfs = {letter: {key(c): d for c, d in bfs_distances(MAP, goal).items() if c != goal}
            for letter, goal in MAP.places.items()}
+    table = load_table()
     return {
+        "q": table.q.round(6).tolist(),  # full table, for the sandbox (H9) on edited maps
         "map": MAP.grid,
         "places": list_places(),
         "bfs": bfs,
         "pairs": sum(len(d) for d in bfs.values()),
-        "tables": {"0.5": table_data(load_table()), "0.1": table_data(slow.table)},
+        "tables": {"0.5": table_data(table), "0.1": table_data(slow.table)},
         "episodes": EPISODES,
         "cases": agent_cases(),
     }

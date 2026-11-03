@@ -134,6 +134,7 @@ Each milestone has a command in `.claude/commands/`; it is closed when its crite
 | H6 | `/evaluate-agent` | `results/cases.md`, `results/traces/` | table of the four cases with the real model; two full traces |
 | H7 | `/final-check` | `informe.pdf` (written by the student) | clean clone + README commands work; no keys in the zip |
 | H8 | `/visualize` | `export_viz.py`, `viz/index.html`, `viz/data.js`, `tests/test_viz.py` | export tests pass; the page shows the four modes |
+| H9 | `/sandbox` | `viz/sandbox-core.js`, `viz/sandbox.html`, `tests/test_sandbox.py` | JS env matches the step tuples; JS training reaches 117/117 on the original map |
 
 ## 3D visualization (extra, H8)
 - Not required by the assignment: it shows the trained policy and the agent cases. It never retrains `q_table.npy` and never calls the LLM.
@@ -148,3 +149,12 @@ Each milestone has a command in `.claude/commands/`; it is closed when its crite
   3. Agent: the four requests with expected and called tools and the answer; the robot plays the `run_policy` route when there is one.
   4. Compare α: two robots, α = 0.5 and α = 0.1, from the same start (default: bar → kitchen, 12 vs 16 steps).
 - Tests (`tests/test_viz.py`): 117 routes per table, all shortest for α = 0.5; α = 0.1 from the bar to the kitchen takes more than 12 steps; case 1 has `run_policy(0, 0, "T")` with 13 steps; the export does not change `q_table.npy`.
+
+## Map sandbox (extra, H9)
+- Not required by the assignment and not part of the evaluated system: a browser simulator that shows why a Q table only works for the map it was trained on ("if the map changes, Q-learning must retrain; search recomputes at once").
+- `data/map.txt`, `q_table.npy` and the Python code are never changed; edits exist only in the browser.
+- `viz/sandbox-core.js`: the environment rules of "States and environment" and the training of "Training and evaluation" reimplemented in JavaScript (α = 0.5, γ = 0.9, random actions, `update` with `terminated`, 100-step limit), with a seeded random generator (seed 0; it does not reproduce NumPy's numbers), BFS and the evaluation over every pair. It runs in the browser and in Node.
+- `viz/sandbox.html`: the 3D restaurant of H8 where tables can be dragged to another free cell and people taken from a tray outside the map and dropped on a free cell (or dragged back out). Places and the fryer area do not move.
+  - A move is accepted only if every free cell stays connected to the three places (BFS); otherwise the piece goes back and a message says why.
+  - For the chosen start and destination, three robots: the original table (`q_table.npy`, exported to `viz/data.js`), a table retrained in the browser on the edited map (blocks of 100 episodes until 100 % of the pairs follow the shortest route, at most 5000; the page shows the episodes used), and the BFS route.
+- Tests (`tests/test_sandbox.py`, run with Node; skipped if Node is missing): the JS `step` gives the five tuples of "States and environment"; JS training on the original map reaches 117/117; a person placement that isolates a cell is rejected.

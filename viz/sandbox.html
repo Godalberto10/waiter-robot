@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Waiter robot sandbox</title>
+<style>
+  :root {
+    --bg: #12141a; --panel: #1a1d25; --panel-2: #232733; --line: #313645;
+    --text: #e9eaee; --muted: #9aa0ae; --blue: #2a78d6; --red: #e0565b; --green: #3fb37f; --white: #e8e4da;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+    font: 14px/1.45 system-ui, "Segoe UI", sans-serif; }
+  #app { display: flex; height: 100%; }
+  #panel { width: 370px; flex: none; background: var(--panel); border-right: 1px solid var(--line); padding: 18px 18px 24px; overflow-y: auto; }
+  #view { position: relative; flex: 1; min-width: 0; }
+  #view canvas { display: block; touch-action: none; }
+  h1 { font-size: 19px; margin: 0; }
+  .sub { color: var(--muted); margin: 2px 0 12px; font-size: 12.5px; }
+  .note { font-size: 12.5px; color: var(--muted); background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+  button { font: inherit; color: var(--text); background: var(--panel-2); border: 1px solid var(--line); border-radius: 7px; padding: 6px 9px; cursor: pointer; }
+  button:hover { border-color: #4a5266; }
+  button.on { background: #2d3a55; border-color: var(--blue); }
+  .group { margin: 12px 0; }
+  .label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 5px; }
+  .row { display: flex; gap: 5px; flex-wrap: wrap; }
+  .card { background: var(--panel-2); border: 1px solid var(--line); border-radius: 9px; padding: 9px 11px; margin-top: 8px; }
+  .card h3 { margin: 0 0 4px; font-size: 13px; display: flex; align-items: center; gap: 7px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: 13px; }
+  .kv span:nth-child(odd) { color: var(--muted); }
+  .dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+  .badge { display: inline-block; padding: 0 7px; border-radius: 99px; font-size: 12px; font-weight: 600; }
+  .yes { background: rgba(63,179,127,.18); color: var(--green); }
+  .no { background: rgba(224,86,91,.18); color: var(--red); }
+  .bar { height: 8px; background: #161920; border-radius: 99px; overflow: hidden; margin-top: 6px; }
+  .bar > div { height: 100%; width: 0; background: var(--blue); transition: width .1s; }
+  #msg { margin-top: 10px; font-size: 13px; min-height: 1.4em; }
+  #msg.err { color: var(--red); } #msg.ok { color: var(--green); }
+  #hud { position: absolute; left: 14px; top: 12px; background: rgba(18,20,26,.78); border: 1px solid var(--line);
+    border-radius: 8px; padding: 6px 10px; font-size: 13px; pointer-events: none; }
+  a { color: #8fb6ff; }
+  @media (max-width: 760px) { #app { flex-direction: column; } #panel { width: 100%; max-height: 48%; border-right: 0; border-bottom: 1px solid var(--line); } }
+</style>
+<script src="data.js"></script>
+<script src="scene.js"></script>
+<script src="sandbox-core.js"></script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<div id="app">
+  <aside id="panel">
+    <h1>Map sandbox</h1>
+    <p class="sub">Topic 7 · move tables and guests, retrain, compare · <a href="index.html">evaluated view</a></p>
+    <p class="note">Drag a <b>table</b> to another free cell, or drag a <b>guest</b> from the tray on the right onto the floor (drag it back to remove it). Click a free cell to set the robot's start. Edits live only in this page: <code>data/map.txt</code> and <code>q_table.npy</code> do not change. The environment and training run here in JavaScript, not in the evaluated Python code.</p>
+    <div class="group"><div class="label">Destination</div><div class="row" id="dests"></div></div>
+    <div class="row"><button id="replay">Replay</button><button id="reset">Reset map</button></div>
+    <div id="msg"></div>
+    <div class="card">
+      <h3>Retraining on this map</h3>
+      <div class="kv"><span>episodes</span><span id="eps">–</span><span>shortest routes</span><span id="score">–</span></div>
+      <div class="bar"><div id="bar"></div></div>
+    </div>
+    <div id="cards"></div>
+  </aside>
+  <main id="view"><div id="hud"></div></main>
+</div>
+
+<script type="module">
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+const D = window.VIZ_DATA, C = window.SandboxCore;
+const W = window.WaiterScene(THREE, OrbitControls, D.map);
+const { x, z, ROWS, COLS } = W;
+const ORIGINAL = new C.Grid(D.map);
+const ORIG_TABLE = C.QTable.from(D.q);  // q_table.npy, trained on the original map
+const NAMES = Object.fromEntries(D.places.map(p => [p.letter, p.name]));
+const ROBOTS = [
+  { id: "orig", name: "Original table (q_table.npy)", color: 0xe0565b, css: "var(--red)", offset: -0.22 },
+  { id: "new", name: "Table retrained on this map", color: 0x2a78d6, css: "var(--blue)", offset: 0 },
+  { id: "bfs", name: "BFS (shortest route)", color: 0xe8e4da, css: "var(--white)", offset: 0.22 },
+];
+const MAX_EPISODES = 5000, TRAY_X = COLS / 2 + 1.25, GUESTS = 5;
+
+// ---------- scene ----------
+const view = document.getElementById("view");
+const { renderer, scene, camera, controls } = W.setup(view);
+camera.position.set(1.2, 9.8, 8.6); controls.target.set(0.8, 0, 0.3);
+const tiles = W.floor(scene);
+const fryerOils = [];
+for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+  if (D.map[r][c] === "~") { const f = W.makeFryer(); f.position.set(x(c), 0, z(r)); scene.add(f); fryerOils.push(f.userData.oil); }
+}
+const fryerLight = new THREE.PointLight(0xff7a1a, 2.2, 3.5); fryerLight.position.set(x(2.5), 1.3, z(1.5)); scene.add(fryerLight);
+D.places.forEach(p => { const g = W.makePlace(p); g.position.set(x(p.col), 0, z(p.row)); scene.add(g); });
+
+// tray of guests outside the map
+const trayBase = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.08, GUESTS * 0.9 + 0.3), new THREE.MeshStandardMaterial({ color: 0x2a2e39, roughness: 0.8 }));
+trayBase.position.set(TRAY_X, -0.04, 0); trayBase.receiveShadow = true; scene.add(trayBase);
+const trayLabel = W.label("guests"); trayLabel.position.set(TRAY_X, 1.35, -(GUESTS * 0.9) / 2 + 0.1); scene.add(trayLabel);
+const traySlot = i => new THREE.Vector3(TRAY_X, 0, (i - (GUESTS - 1) / 2) * 0.9);
+
+// movable pieces: tables on the map and guests (on the map or in the tray)
+const pieces = [];
+function addPiece(kind, obj, r, c, slot) {
+  const p = { kind, obj, r, c, slot };
+  obj.traverse(o => { o.userData.piece = p; });
+  scene.add(obj); pieces.push(p); seat(p); return p;
+}
+function seat(p) {
+  if (p.r === null) p.obj.position.copy(traySlot(p.slot));
+  else p.obj.position.set(x(p.c), 0, z(p.r));
+}
+const SHIRTS = [0x3d6fb6, 0xb6503d, 0x4f9a5b, 0x8a5bb0, 0xc49a2c];
+function buildPieces() {
+  pieces.splice(0).forEach(p => scene.remove(p.obj));
+  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) if (D.map[r][c] === "#") addPiece("table", W.makeTable(), r, c, null);
+  for (let i = 0; i < GUESTS; i++) addPiece("person", W.makePerson(SHIRTS[i]), null, null, i);
+}
+
+const robots = Object.fromEntries(ROBOTS.map(R => [R.id, W.makeRobot(scene, R.color)]));
+const overlay = new THREE.Group(); scene.add(overlay);
+const hover = new THREE.Mesh(new THREE.RingGeometry(0.36, 0.46, 40), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8, side: THREE.DoubleSide }));
+hover.rotation.x = -Math.PI / 2; hover.visible = false; scene.add(hover);
+
+// ---------- state ----------
+const S = { grid: ORIGINAL, dest: "T", start: [0, 0], table: null, training: null, runners: [] };
+const $ = id => document.getElementById(id);
+const say = (text, cls = "") => { $("msg").textContent = text; $("msg").className = cls; };
+const badge = ok => `<span class="badge ${ok ? "yes" : "no"}">${ok ? "yes" : "no"}</span>`;
+
+function validStart() {
+  const g = S.grid, goal = g.places[S.dest];
+  const ok = ([r, c]) => g.isFree(r, c) && !(r === goal[0] && c === goal[1]);
+  if (!ok(S.start)) S.start = g.destinations.map(l => g.places[l]).find(ok) || g.freeCells().find(ok);
+}
+
+function renderDests() {
+  $("dests").innerHTML = ORIGINAL.destinations.map(l => `<button data-dest="${l}" class="${l === S.dest ? "on" : ""}">${l} · ${NAMES[l]}</button>`).join("");
+}
+
+// Retrain on the current map, one block of 100 episodes per frame so the page stays responsive.
+function retrain() {
+  const run = C.trainBlocks(S.grid, { max: MAX_EPISODES });
+  S.training = run; S.table = null;
+  S.runners = []; Object.values(robots).forEach(rb => { rb.visible = false; });
+  W.clear(overlay); $("cards").innerHTML = "";
+  const tick = () => {
+    if (S.training !== run) return;  // a newer edit started another training
+    const { value, done } = run.next();
+    if (value) {
+      $("eps").textContent = value.episodes;
+      $("score").innerHTML = `${value.good}/${value.total} ${badge(value.good === value.total)}`;
+      $("bar").style.width = `${100 * value.episodes / MAX_EPISODES}%`;
+      S.table = value.table;
+    }
+    if (done || value.done) { S.training = null; showRoutes(); } else setTimeout(tick, 0);
+  };
+  tick();
+}
+
+function showRoutes() {
+  if (!S.table) return;
+  validStart();
+  const g = S.grid, dist = C.bfs(g, g.places[S.dest]).get(S.start.join(","));
+  const routes = {
+    orig: C.rollout(g, ORIG_TABLE, S.start, S.dest),
+    new: C.rollout(g, S.table, S.start, S.dest),
+    bfs: (() => { const path = C.bfsPath(g, S.start, S.dest); const steps = path.length - 1; return { reached: true, steps, return: -(steps - 1) + 20, path }; })(),
+  };
+  const origScore = C.evaluate(g, ORIG_TABLE);
+  W.clear(overlay);
+  const goal = g.places[S.dest]; W.marker(overlay, goal[0], goal[1], 0xffffff);
+  S.runners = ROBOTS.map(R => { W.trail(overlay, routes[R.id].path, R.color, R.offset); return new W.Runner(robots[R.id], routes[R.id].path, R.offset); });
+  $("cards").innerHTML = ROBOTS.map(R => {
+    const rt = routes[R.id], shortest = rt.reached && rt.steps === dist;
+    const extra = R.id === "orig" ? `<span>on this map</span><span>${origScore.good}/${origScore.total} pairs shortest</span>` : "";
+    return `<div class="card"><h3><span class="dot" style="background:${R.css}"></span>${R.name}</h3><div class="kv">
+      <span>reached</span><span>${badge(rt.reached)}</span><span>steps</span><span><b>${rt.steps}</b> (shortest: ${dist})</span>
+      <span>return</span><span>${rt.return.toFixed(1)}</span><span>shortest</span><span>${badge(shortest)}</span>${extra}</div></div>`;
+  }).join("");
+}
+
+// ---------- editing ----------
+function cellFromPoint(pt) {
+  const c = Math.round(pt.x + (COLS - 1) / 2), r = Math.round(pt.z + (ROWS - 1) / 2);
+  return S.grid.inBounds(r, c) && Math.abs(pt.x - x(c)) <= 0.5 && Math.abs(pt.z - z(r)) <= 0.5 ? [r, c] : null;
+}
+const canDropOn = ([r, c]) => S.grid.at(r, c) === ".";  // free and not a place
+
+function tryMove(p, target) {
+  const ch = p.kind === "table" ? "#" : C.PERSON;
+  let g = S.grid;
+  if (p.r !== null) g = g.with(p.r, p.c, ".");
+  if (target) {
+    if (!canDropOn(target)) { say(`(${target[0]}, ${target[1]}) is not a free cell: drop on an empty floor cell.`, "err"); return false; }
+    g = g.with(target[0], target[1], ch);
+  } else if (p.kind === "table") {
+    say("Tables stay in the restaurant: drop it on a free cell.", "err"); return false;
+  }
+  if (!C.isConnected(g)) {
+    const reach = C.bfs(g, g.places[g.destinations[0]]);
+    const cut = g.freeCells().filter(([r, c]) => !reach.has(`${r},${c}`)).map(([r, c]) => `(${r}, ${c})`);
+    say(`Blocked: ${cut.slice(0, 4).join(", ")}${cut.length > 4 ? "…" : ""} would be cut off from the places. The piece goes back.`, "err");
+    return false;
+  }
+  if (target) { p.r = target[0]; p.c = target[1]; } else { p.r = p.c = null; }
+  S.grid = g;
+  say(target ? `${p.kind === "table" ? "Table" : "Guest"} placed at (${target[0]}, ${target[1]}). Retraining…` : "Guest back in the tray. Retraining…", "ok");
+  return true;
+}
+
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2(), floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), hit = new THREE.Vector3();
+function aim(e) {
+  const rect = renderer.domElement.getBoundingClientRect();
+  mouse.set(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1);
+  ray.setFromCamera(mouse, camera);
+}
+let drag = null, downAt = null;
+renderer.domElement.addEventListener("pointerdown", e => {
+  downAt = [e.clientX, e.clientY]; aim(e);
+  const h = ray.intersectObjects(pieces.map(p => p.obj), true)[0];
+  if (h) { drag = h.object.userData.piece; controls.enabled = false; renderer.domElement.setPointerCapture(e.pointerId); }
+});
+renderer.domElement.addEventListener("pointermove", e => {
+  aim(e);
+  if (!drag) { hover.visible = false; return; }
+  if (!ray.ray.intersectPlane(floorPlane, hit)) return;
+  drag.obj.position.set(hit.x, 0.35, hit.z);
+  const cell = cellFromPoint(hit);
+  hover.visible = !!cell;
+  if (cell) { hover.position.set(x(cell[1]), 0.06, z(cell[0])); hover.material.color.set(canDropOn(cell) ? 0x3fb37f : 0xe0565b); }
+});
+renderer.domElement.addEventListener("pointerup", e => {
+  const moved = downAt && Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 5;
+  hover.visible = false;
+  if (drag) {
+    const p = drag; drag = null; controls.enabled = true;
+    aim(e);
+    if (moved && ray.ray.intersectPlane(floorPlane, hit)) {
+      const target = cellFromPoint(hit);
+      const same = target && p.r === target[0] && p.c === target[1];
+      if (!same && tryMove(p, target)) { seat(p); retrain(); return; }
+    }
+    seat(p); return;
+  }
+  if (moved) return;  // the camera was dragged
+  aim(e);
+  const t = ray.intersectObjects(tiles, false)[0];
+  if (!t) return;
+  const { r, c } = t.object.userData, goal = S.grid.places[S.dest];
+  if (!S.grid.isFree(r, c)) { say(`(${r}, ${c}) is not free: the robot cannot start there.`, "err"); return; }
+  if (r === goal[0] && c === goal[1]) { say(`(${r}, ${c}) is already the destination.`, "err"); return; }
+  S.start = [r, c]; say(`Start set to (${r}, ${c}).`, "ok"); showRoutes();
+});
+
+document.getElementById("panel").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.dest) { S.dest = b.dataset.dest; renderDests(); showRoutes(); }
+  if (b.id === "replay") showRoutes();
+  if (b.id === "reset") { S.grid = ORIGINAL; buildPieces(); say("Original map restored. Retraining…", "ok"); retrain(); }
+});
+
+// ---------- loop ----------
+const clock = new THREE.Clock();
+renderer.setAnimationLoop(() => {
+  const dt = Math.min(clock.getDelta(), 0.05);
+  S.runners.forEach(rn => rn.update(dt));
+  $("hud").textContent = S.training ? "retraining…" :
+    S.runners.map((rn, i) => `${["original", "retrained", "BFS"][i]}: ${rn.step}/${rn.path.length - 1}`).join(" · ");
+  const flick = 0.75 + 0.25 * Math.sin(performance.now() / 180);
+  fryerOils.forEach((o, i) => { o.material.emissiveIntensity = flick + 0.1 * Math.sin(i + performance.now() / 90); });
+  fryerLight.intensity = 1.8 + 0.6 * flick;
+  pieces.forEach(p => { if (p.kind === "person" && p !== drag) p.obj.rotation.y = 0.3 * Math.sin(performance.now() / 900 + p.slot); });
+  controls.update();
+  renderer.render(scene, camera);
+});
+
+// Optional URL hash for a quick demo: #move-table moves the table at (0, 5) to (2, 5).
+buildPieces(); renderDests();
+if (location.hash === "#move-table") {
+  const p = pieces.find(q => q.r === 0 && q.c === 5);
+  S.dest = "K"; S.start = [0, 8]; renderDests();
+  if (tryMove(p, [2, 5])) seat(p);
+}
+retrain();
+</script>
+</body>
+</html>
