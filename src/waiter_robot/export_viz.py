@@ -12,11 +12,11 @@ VIZ_PATH = Path("viz/data.js")
 TRACES_DIR = Path("results/traces")
 CASES_TABLE = Path("results/cases.md")
 
-# Expected tools of the four cases, as in CLAUDE.md, section "Cases (R5, H6)".
+# Expected tools of the four cases, as in CLAUDE.md, section "Cases (R5, H6)" (since H10).
 EXPECTED_TOOLS = [
-    'list_places, run_policy(0, 0, "T")',
-    'list_places, run_policy(0, 8, "K")',
-    "list_places; no run_policy",
+    'run_policy(0, 0, "T")',
+    'run_policy(0, 8, "K")',
+    "no run_policy",
     "none",
 ]
 

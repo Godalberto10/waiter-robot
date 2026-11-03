@@ -68,6 +68,7 @@ K....#..B
 - Each configuration trains 3000 episodes; after each block of 100 the 117 pairs are evaluated → 30 points per curve.
 - One plot (matplotlib): x = episodes, y = % shortest routes, one curve per α, horizontal line at 95 %. Saved to `results/experiment.png`.
 - Prints one line per configuration with the first block reaching 95 % and the final %.
+- Seeds (H11): `uv run experiment --seeds 5` repeats both configurations with seeds 0-4 and saves `results/experiment_seeds.png`: per α, the mean % after each block and a band from the minimum to the maximum over the seeds; it prints, per α, the first block whose mean reaches 95 % and the final mean, minimum and maximum. `results/experiment.png` (seed 0) stays; `q_table.npy` is not touched.
 
 ## Tools (R4)
 Docstrings and error messages in English. The table is loaded once with `np.load("q_table.npy")` when the module is imported; it is never trained and `update` is never called.
@@ -90,23 +91,28 @@ Docstrings and error messages in English. The table is loaded once with `np.load
 - Tools: `list_places` and `run_policy` (the wrappers above). The system prompt, in English, is a procedure the model follows in order:
   1. Is the request about moving the robot? Any request to take something or send the robot somewhere is, even if the place does not exist (then step 3 asks).
      Only requests that do not ask to move it (wine, bookings, weather) are not: say the robot only carries things between kitchen, bar and terrace door, and stop: no tools.
-  2. Call `list_places`, before answering or asking anything, to map place names to letters and cells; never assume a cell.
+  2. Use the places given in the system prompt (H10) to map place names to letters and cells; `list_places` stays available as a tool but is not required; never assume a cell.
   3. Find origin and destination in that list; a name that clearly refers to a listed place is that place ("terrace" is the terrace door).
      If the origin is not stated, ask where the robot is; if a place matches none in the list, ask which place is meant; in both cases stop: no `run_policy`.
   4. Call `run_policy` and answer only with the exact steps and return it gives; do not describe or list the route (the full path stays in the tool result).
   5. If a tool returns `"error: ..."`, explain the error to the user instead of retrying with invented values.
+- Reinforced in code (H10), so two decisions no longer depend on the model:
+  - places: the agent calls `list_places()` itself when it is built and appends the result to the system prompt (`Places (from list_places): [...]`);
+  - describing instead of acting: if the final answer names a tool (`list_places` or `run_policy`) as text, the agent sends once more the message `Call the tool; do not describe the steps.` and keeps the new answer. At most one retry; both turns stay in the printed trace.
 - Entry point: the request is a command-line argument; it prints every message (`pretty_print`): request, tool calls, tool results and final answer.
 - The model is injectable: tests build the agent with the LLM double instead of `ChatOllama`.
 
 ## Cases (R5, H6)
 | # | Request | Tools called | The answer must |
 |---|---|---|---|
-| 1 | "Take this dish from the kitchen to the terrace" | `list_places`, `run_policy(0, 0, "T")` | say 13 steps |
-| 2 | "The robot is at the bar; send it back to the kitchen" | `list_places`, `run_policy(0, 8, "K")` | say 12 steps |
+| 1 | "Take this dish from the kitchen to the terrace" | `run_policy(0, 0, "T")` | say 13 steps |
+| 2 | "The robot is at the bar; send it back to the kitchen" | `run_policy(0, 8, "K")` | say 12 steps |
 | 3 | "Take the dish from the kitchen to the storeroom" | no `run_policy` | ask which place "storeroom" is |
 | 4 | "What wine do you recommend?" | no `run_policy` | say it is outside the robot's job |
+- Since H10 `list_places` is called by the code, so the model may or may not call it again; in H6 (attempts 1-5) it was expected as the first tool call.
 - With the double (H5): one test runs case 1 end to end (request → tool calls → answer with 13 steps); another runs case 4 and checks `run_policy` is not called.
-- With the real model (H6): the four cases are run, the tools called and the answer are recorded in a table, and two full traces go into the report.
+  H10 adds: the places are in the system prompt; an answer that names a tool triggers exactly one retry; a normal answer triggers none.
+- With the real model (H6, and attempt 6 in H10): the four cases are run, the tools called and the answer are recorded in a table, and two full traces go into the report.
 
 ## Code rules
 - uv application project, Python pinned with `uv python pin 3.14`. `pyproject.toml`, `uv.lock` and `.python-version` are committed.
@@ -135,6 +141,8 @@ Each milestone has a command in `.claude/commands/`; it is closed when its crite
 | H7 | `/final-check` | `informe.pdf` (written by the student) | clean clone + README commands work; no keys in the zip |
 | H8 | `/visualize` | `export_viz.py`, `viz/index.html`, `viz/data.js`, `tests/test_viz.py` | export tests pass; the page shows the four modes |
 | H9 | `/sandbox` | `viz/sandbox-core.js`, `viz/sandbox.html`, `tests/test_sandbox.py` | JS env matches the step tuples; JS training reaches 117/117 on the original map |
+| H10 | `/reinforce-agent` | `agent.py`, `tests/test_agent.py`, `results/cases.md`, `results/traces/` | double tests for places and retry pass; attempt 6 with the real model recorded |
+| H11 | `/seeds` | `experiment.py`, `tests/test_experiment.py`, `results/experiment_seeds.png` | plot with mean and min-max band over 5 seeds for both α |
 
 ## 3D visualization (extra, H8)
 - Not required by the assignment: it shows the trained policy and the agent cases. It never retrains `q_table.npy` and never calls the LLM.

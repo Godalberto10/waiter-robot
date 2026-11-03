@@ -12,6 +12,7 @@ uv run pytest
 uv run train      # trains the Q table (alpha 0.5, gamma 0.9, 3000 episodes, seed 0) -> q_table.npy
 uv run evaluate   # greedy run over the 117 pairs -> "shortest routes: N/117 (P %)"
 uv run experiment # alpha 0.5 vs 0.1, evaluated every 100 episodes -> results/experiment.png
+uv run experiment --seeds 5  # the same with seeds 0-4: mean and min-max band -> results/experiment_seeds.png
 ```
 
 The agent needs [Ollama](https://ollama.com) running locally with the model pulled (`ollama pull qwen2.5:14b`):

@@ -3,7 +3,7 @@ import json
 from langchain_core.messages import AIMessage, SystemMessage, ToolMessage
 
 from scripted_model import ScriptedModel, tool_call
-from waiter_robot.agent import SYSTEM_PROMPT, TOOLS, build_agent
+from waiter_robot.agent import RETRY_MESSAGE, SYSTEM_PROMPT, TOOLS, ask, build_agent
 
 
 def run(model: ScriptedModel, request: str) -> list:
@@ -74,3 +74,46 @@ def test_run_policy_description_mentions_error_text() -> None:
     [run_policy_tool] = [t for t in TOOLS if t.name == "run_policy"]
     assert "error:" in run_policy_tool.description
     assert "Raises" not in run_policy_tool.description
+
+
+# H10: places given by code, and one retry when the model names a tool instead of calling it.
+
+def test_system_prompt_has_the_places() -> None:
+    for place in ('"letter": "B", "name": "bar", "row": 0, "col": 8',
+                  '"letter": "K", "name": "kitchen", "row": 0, "col": 0',
+                  '"letter": "T", "name": "terrace door", "row": 5, "col": 8'):
+        assert place in SYSTEM_PROMPT
+
+
+def test_answer_naming_a_tool_is_retried_once() -> None:
+    model = ScriptedModel(replies=[
+        AIMessage(content="1. Call list_places. 2. Call run_policy to get the route."),
+        tool_call("run_policy", {"start_row": 0, "start_col": 8, "destination": "K"}, "c1"),
+        AIMessage(content="The robot goes from the bar to the kitchen in 12 steps."),
+    ])
+    messages = ask(build_agent(model), "The robot is at the bar; send it back to the kitchen")
+
+    assert len(model.calls) == 3
+    assert model.calls[1][-1].content == RETRY_MESSAGE  # the retry is the last thing the model saw
+    [policy_msg] = tool_messages(messages, "run_policy")
+    assert json.loads(policy_msg.content)["steps"] == 12
+    assert messages[-1].content.endswith("in 12 steps.")
+
+
+def test_retry_happens_at_most_once() -> None:
+    model = ScriptedModel(replies=[
+        AIMessage(content="I would call run_policy."),
+        AIMessage(content="I would still call run_policy."),
+    ])
+    messages = ask(build_agent(model), "The robot is at the bar; send it back to the kitchen")
+    assert len(model.calls) == 2
+    assert messages[-1].content == "I would still call run_policy."
+
+
+def test_normal_answer_is_not_retried() -> None:
+    model = ScriptedModel(replies=[
+        AIMessage(content="The storeroom is not a listed place. Which place do you mean?"),
+    ])
+    messages = ask(build_agent(model), "Take the dish from the kitchen to the storeroom")
+    assert len(model.calls) == 1
+    assert all(m.content != RETRY_MESSAGE for m in messages)

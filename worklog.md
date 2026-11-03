@@ -99,3 +99,19 @@ Accepted: `viz/sandbox-core.js` (environment, seeded random generator, Q-learnin
 Rejected: computing the new route with BFS only (it would hide the point of the extra: the Q table has to be retrained when the map changes).
 Correction requested: none. A guest at (4, 4) is refused, and correctly: it would cut off (5, 4), between two tables; the test that was meant to show a harmless guest uses (2, 6) instead.
 Closing check: `uv run pytest` → 42 passed. JS `step` gives the five contract tuples; JS training reaches 117/117 on the original map in 1200 episodes (the topic sheet says about 1200); moving the table at (0, 5) to (2, 5): the original table gets stuck from the bar to the kitchen (73/117 pairs shortest on the new map), the retrained one needs 800 episodes and takes the new 8-step route, like BFS. `data/map.txt` and `q_table.npy` unchanged; both pages checked in Edge.
+
+## H11 · experiment with five seeds (2026-11-03)
+
+Command: /seeds. Written before H10 because it is quick; both were specified together (the `CLAUDE.md` and `.claude/**` deny rules were lifted for that edit only and restored; a test edit was refused again).
+Accepted: `uv run experiment --seeds 5` in `experiment.py` (`learning_curve` takes the seed; `summarize` gives mean, min and max per block); `results/experiment_seeds.png` with the mean line and the min-max band per α; `tests/test_experiment.py` (3 tests: per-block summary, the seed-0 curve is still the H3 one, two seeds give different curves); README line.
+Rejected: replacing `results/experiment.png`; the seed-0 curve is kept because the analysis of the 16 detour pairs comes from it.
+Correction requested: none.
+Closing check: α = 0.5: the mean passes 95 % at 800 episodes and every seed ends at 100 %. α = 0.1: final mean 93.8 % (min 86.3 %, max 95.7 %); seed 0 is the worst of the five, so the report's 86.3 % and the dip at 1700 episodes belong to that seed, not to α = 0.1 in general. `q_table.npy` and `results/experiment.png` unchanged (same md5); `uv run pytest` → 45 passed.
+
+## H10 · agent reinforced in code, attempt 6 (2026-11-03)
+
+Command: /reinforce-agent (specified together with H11; same temporary lift and restore of the deny rules).
+Accepted: in `agent.py`, the system prompt now ends with `Places (from list_places): [...]`, built by the code from `list_places()`, and step 2 says to use those places (`list_places` stays as a tool, as R4 asks); `ask(agent, request)` sends `Call the tool; do not describe the steps.` once if the final answer names `list_places` or `run_policy` as text, and `main` uses it. `tests/test_agent.py`: 4 new tests with `ScriptedModel` (places in the prompt, exactly one retry when a tool is named, at most one retry, no retry for a normal answer). `results/cases.md` with attempt 6 and the six attempts; `viz/data.js` and the expected tools in `export_viz.py` updated to the new contract.
+Rejected: removing `list_places` from the model's tools (R4 asks for both tools).
+Correction requested: the first edit of the prompt left a raw line break inside a string and did not change step 2; fixed and checked by printing the final prompt.
+Closing check: `uv run pytest` → 49 passed with Ollama closed. Attempt 6 with `qwen2.5:14b`: 4 of 4 cases (case 2, which failed in attempt 5, now calls `run_policy(0, 8, "K")` and answers 12 steps). The retry did not fire in any real case, so the fix came from giving the places by code; the retry is only proven by the double tests. In case 2 the model also listed the full path, against step 4, but copied it exactly from the tool.
