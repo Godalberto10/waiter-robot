@@ -9,4 +9,6 @@ Run every command from the project root.
 ```
 uv sync
 uv run pytest
+uv run train      # trains the Q table (alpha 0.5, gamma 0.9, 3000 episodes, seed 0) -> q_table.npy
+uv run evaluate   # greedy run over the 117 pairs -> "shortest routes: N/117 (P %)"
 ```

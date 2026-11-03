@@ -27,3 +27,11 @@ Accepted: `src/waiter_robot/env.py` (`WaiterRobotEnv`, reads `data/map.txt`, `Di
 Rejected: nothing.
 Correction requested: `check_env` calls `reset(options={})`, which the contract did not cover; the first version failed with a `KeyError`. Empty `options` now behave like no `options` (random start), and I updated the CLAUDE.md contract by hand to say so.
 Closing check: `uv run pytest` → 17 passed; `check_env` raises no warnings (the test asserts the list of warnings is empty).
+
+## H2 · training and evaluation (2026-11-03)
+
+Command: /train
+Accepted: `src/waiter_robot/q_table.py` (Session 5 `QTable` from `codigo-tema-3.zip`, only the `__main__` demo removed), `train.py` (`uv run train`: α = 0.5, γ = 0.9, 3000 episodes, seed 0, random actions, `update(s, a, r, s2, terminated)`), `evaluate.py` (`uv run evaluate`: BFS distances from the map, greedy run with a 100-step limit over the 39 × 3 = 117 pairs), `q_table.npy` (162 × 4), the `train` and `evaluate` entry points and their README lines.
+Rejected: nothing.
+Correction requested: H2 had no tests; reproducibility and "evaluation does not change the table" had only been checked by hand (md5). Added `tests/test_train.py`: two trainers with seed 0 give identical tables, and `shortest_routes` leaves the table unchanged and returns (117, 117).
+Closing check: `uv run evaluate` → `shortest routes: 117/117 (100.0 %)` (criterion: at least 112); `uv run pytest` → 19 passed.
