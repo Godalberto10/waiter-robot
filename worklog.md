@@ -51,3 +51,11 @@ Accepted: `src/waiter_robot/tools.py` with `list_places()` (place names in a dic
 Rejected: nothing.
 Correction requested: none. Claude Code fixed two bugs of its first version: the Q table variable was called `TABLE` and shadowed the `TABLE = "#"` constant, so the table check never fired (caught by the table test; renamed to `QTABLE`); and the tools env is created with `disable_env_checker=True`, because the passive checker broke the next `step` after a `reset` that raised (the env is still checked with `check_env` in `test_env.py`). Extra check outside the contract: non-integer row or column raises `ValueError`, in case the LLM passes text.
 Closing check: `run_policy(0, 0, "T")` → reached, 13 steps, return 8.0, 14 cells from [0, 0] to [5, 8]; `uv run pytest` → 29 passed.
+
+## H5 · LLM double and agent (2026-11-03)
+
+Command: /agent
+Accepted: `src/waiter_robot/agent.py` (`uv run agent "<request>"`): `create_agent` with `ChatOllama(model="qwen2.5:7b", temperature=0)`, the tools `list_places` and `run_policy` (a wrapper that returns `"error: <message>"` instead of raising), the system prompt with the five rules of the contract, and `build_agent(model)` so tests can inject the double. `tests/scripted_model.py` (`ScriptedModel`: fixed replies in order, records the messages it receives, `bind_tools` returns itself). `tests/test_agent.py`: case 1 end to end (the figures come from the real `run_policy`, and the model receives them before answering), case 4 does not call `run_policy`, and a `run_policy` error comes back to the model as text without stopping the program. Entry point `agent` and an Ollama section in the README.
+Rejected: nothing.
+Correction requested: the tool description the LLM reads still said "Raises: ValueError", but the LLM receives an `"error: ..."` text. The tool docstring is now built from the one in `tools.py`, with "Raises" replaced by an "Errors" section that describes the text. A new test checks the description contains "error:" and no longer contains "Raises"; it caught a first attempt that kept both sections (Python 3.13+ strips docstring indentation, fixed with `inspect.cleandoc`).
+Closing check: `uv run pytest` → 33 passed, also with the network blocked (no Ollama, no token). The double tests the agent's code, not the model's judgement; that is measured in H6.
