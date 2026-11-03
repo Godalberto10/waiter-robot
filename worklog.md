@@ -76,6 +76,14 @@ Rejected: a sixth attempt; the closing criterion is the table and two real trace
 Correction requested: none on the code; see H5 reopened for the prompt and model changes.
 Closing check: final attempt (`qwen2.5:14b`) meets 3 of 4 cases. Case 1: `list_places` → `run_policy(0, 0, "T")` → "13 steps". Case 2 fails: answer in Thai describing the procedure, no tool called. Case 3: asks which place, no `run_policy` (but skips `list_places`). Case 4: out of scope, no tools. No answer contained a figure that did not come from a tool.
 
+## H7 · report and final review (2026-11-03)
+
+Command: /final-check (run after the report and H8, so that it covers the whole delivery).
+Accepted: `informe.pdf` (about 3.5 pages, built from `report/informe.md`): environment decisions, training and evaluation, the experiment plot with its reading (checked by listing the 16 pairs α = 0.1 gets wrong: all arrive, with 2–4 extra steps, 14 of them towards the kitchen), the 3D comparison figure, the table of the four cases with expected and called tools, two real traces, the five attempts and the conclusions.
+Rejected: trace 2 in the report was first case 2, the Thai answer; it was replaced by case 4, and the Thai answer is described and translated in the text instead (the original trace is kept in `results/traces/case2.txt`).
+Correction requested: an "Expected tools" column in the cases table (report and `results/cases.md`), because "none" in cases 3 and 4 is the correct behaviour and only case 2 fails.
+Closing check: fresh clone → `uv sync`, `uv run pytest` (37 passed), `uv run evaluate` (117/117); retraining gives the same `q_table.npy` (no git diff); every item of the delivery structure is present; `CLAUDE.md` has 150 lines; no keys or tokens in the repository; `.venv/`, `__pycache__/` and `.env` are not tracked.
+
 ## H8 · 3D visualization, extra (2026-11-03)
 
 Command: /visualize (extra, not required by the assignment). I decided its scope (Three.js page, four modes); to let Claude Code write the new CLAUDE.md section, the H8 milestone row and `.claude/commands/visualize.md`, I removed the `CLAUDE.md` and `.claude/**` deny rules from `settings.json` for that edit only. Claude Code restored them right after, and a test edit of `CLAUDE.md` was refused again.
