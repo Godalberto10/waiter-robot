@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "defaultMode": "default",
+    "deny": [
+      "Edit(./CLAUDE.md)",
+      "Edit(./.claude/**)",
+      "Edit(./data/map.txt)",
+      "Read(./.env)",
+      "Bash(git push:*)"
+    ],
+    "ask": [
+      "Bash(git commit:*)",
+      "Bash(uv add:*)",
+      "Bash(uv remove:*)"
+    ]
+  }
+}
