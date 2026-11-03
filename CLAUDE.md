@@ -37,7 +37,7 @@ K....#..B
   Examples: robot at K heading to T = 108 · at B heading to K = 62 · at T heading to B = 53.
 - Actions: `action_space = Discrete(4)`: 0 ↑, 1 →, 2 ↓, 3 ←.
 - `reset(seed=None, options=None)` calls `super().reset(seed=seed)` and returns `(state, {})`.
-  - Without `options`: draws with `self.np_random` a destination and a free start cell that is not the destination (may be another place; never a table or danger).
+  - Without `options` or with empty `options` (as `check_env` calls it): draws with `self.np_random` a destination and a free start cell that is not the destination (may be another place; never a table or danger).
   - With `options={"start": (row, col), "destination": "T"}`: starts there. A non-free start, a destination other than K/B/T, or start equal to destination raise `ValueError`.
   - `reset(options={"start": (0, 0), "destination": "T"})` → `(108, {})`.
 - `step(action)` returns `(state, reward, terminated, truncated, {})`. Rules, one test each:
