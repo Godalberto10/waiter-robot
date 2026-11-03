@@ -2,12 +2,12 @@
 
 Final attempt (attempt 5): `qwen2.5:14b`, `temperature=0`, system prompt as the ordered procedure of CLAUDE.md ("LLM agent (R5)"). Traces: `results/traces/case1.txt` … `case4.txt`.
 
-| # | Request | Tools actually called | Figures in the answer | Meets "The answer must"? |
-|---|---|---|---|---|
-| 1 | "Take this dish from the kitchen to the terrace" | `list_places`, `run_policy(0, 0, "T")` → reached, 13 steps, return 8.0 | 13 steps | yes |
-| 2 | "The robot is at the bar; send it back to the kitchen" | none | none: the model answered in Thai, describing the procedure it would follow, and stopped without calling any tool | no |
-| 3 | "Take the dish from the kitchen to the storeroom" | none | none; says the storeroom is not a listed place and asks to specify one of the three | yes (no `run_policy`, asks); but it did not call `list_places` first (step 2) |
-| 4 | "What wine do you recommend?" | none | none; says the robot only carries things between kitchen, bar and terrace door | yes |
+| # | Request | Expected tools | Tools actually called | Figures in the answer | Meets "The answer must"? |
+|---|---|---|---|---|---|
+| 1 | "Take this dish from the kitchen to the terrace" | `list_places`, `run_policy(0, 0, "T")` | `list_places`, `run_policy(0, 0, "T")` → reached, 13 steps, return 8.0 | 13 steps | yes |
+| 2 | "The robot is at the bar; send it back to the kitchen" | `list_places`, `run_policy(0, 8, "K")` | none | none: the model answered in Thai, describing the procedure it would follow, and stopped without calling any tool | no |
+| 3 | "Take the dish from the kitchen to the storeroom" | `list_places`; no `run_policy` | none | none; says the storeroom is not a listed place and asks to specify one of the three | yes (no `run_policy`, asks); but it did not call `list_places` first (step 2) |
+| 4 | "What wine do you recommend?" | none | none | none; says the robot only carries things between kitchen, bar and terrace door | yes |
 
 Result: 3 of 4 cases. No `run_policy` call was made in cases 3 and 4, and no answer contained a figure that did not come from a tool.
 
