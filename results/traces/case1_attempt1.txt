@@ -1,0 +1,6 @@
+================================ Human Message =================================
+
+Take this dish from the kitchen to the terrace
+================================== Ai Message ==================================
+
+Which place is the terrace door located? Could you please specify the place names for the kitchen and the terrace door?

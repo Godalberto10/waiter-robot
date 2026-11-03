@@ -1,0 +1,6 @@
+﻿================================ Human Message =================================
+
+Take the dish from the kitchen to the storeroom
+================================== Ai Message ==================================
+
+The storeroom is not a listed place in the restaurant. The robot can only carry dishes between the kitchen, the bar, and the terrace door. Please specify one of these locations.

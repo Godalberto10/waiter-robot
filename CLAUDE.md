@@ -6,7 +6,7 @@ A waiter robot in a restaurant carries dishes and drinks between the kitchen (K)
   - "Take this dish from the kitchen to the terrace" → origin K, destination T.
   - "The robot is at the bar; send it back to the kitchen" → origin B, destination K.
   - "Take these drinks from the bar to the terrace" → origin B, destination T.
-- The LLM (Ollama, `qwen2.5:7b`) understands the request, extracts origin and destination, calls the tools and writes the answer in English.
+- The LLM (Ollama, `qwen2.5:14b`) understands the request, extracts origin and destination, calls the tools and writes the answer in English.
   It never computes routes or gives its own figures: the steps and return in the answer are the ones `run_policy` returns.
 - `run_policy` validates origin and destination, places the robot with `reset(options=...)` and applies the Q table step by step.
   It does not train: the table never changes.
@@ -86,13 +86,15 @@ Docstrings and error messages in English. The table is loaded once with `np.load
   The `run_policy` wrapper catches `ValueError` and returns the text `"error: <message>"` to the LLM; the program does not stop.
 
 ## LLM agent (R5)
-- Built like `route_agent.py` / `cliff_agent.py`: LangChain `create_agent` with `ChatOllama(model="qwen2.5:7b", temperature=0)`; no token, no `.env`.
-- Tools: `list_places` and `run_policy` (the wrappers above). The system prompt, in English, says:
-  - always call `list_places` first to map place names to letters and cells; never assume a cell;
-  - call `run_policy` for every route and answer only with the figures it returns (steps, return, path);
-  - if the origin is not stated, ask where the robot is; if a place is not in `list_places`, ask which place is meant; in both cases do not call `run_policy`;
-  - if the request is not about moving the robot, say the robot only carries things between kitchen, bar and terrace door, and do not call `run_policy`;
-  - if a tool returns `"error: ..."`, explain the error to the user instead of retrying with invented values.
+- Built like `route_agent.py` / `cliff_agent.py`: LangChain `create_agent` with `ChatOllama(model="qwen2.5:14b", temperature=0)`; no token, no `.env`. `qwen2.5:7b` was tried first and failed case 4 in three prompt attempts (see `worklog.md`).
+- Tools: `list_places` and `run_policy` (the wrappers above). The system prompt, in English, is a procedure the model follows in order:
+  1. Is the request about moving the robot? Any request to take something or send the robot somewhere is, even if the place does not exist (then step 3 asks).
+     Only requests that do not ask to move it (wine, bookings, weather) are not: say the robot only carries things between kitchen, bar and terrace door, and stop: no tools.
+  2. Call `list_places`, before answering or asking anything, to map place names to letters and cells; never assume a cell.
+  3. Find origin and destination in that list; a name that clearly refers to a listed place is that place ("terrace" is the terrace door).
+     If the origin is not stated, ask where the robot is; if a place matches none in the list, ask which place is meant; in both cases stop: no `run_policy`.
+  4. Call `run_policy` and answer only with the exact steps and return it gives; do not describe or list the route (the full path stays in the tool result).
+  5. If a tool returns `"error: ..."`, explain the error to the user instead of retrying with invented values.
 - Entry point: the request is a command-line argument; it prints every message (`pretty_print`): request, tool calls, tool results and final answer.
 - The model is injectable: tests build the agent with the LLM double instead of `ChatOllama`.
 

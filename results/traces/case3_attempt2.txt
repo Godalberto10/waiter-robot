@@ -1,0 +1,6 @@
+================================ Human Message =================================
+
+Take the dish from the kitchen to the storeroom
+================================== Ai Message ==================================
+
+The storeroom is not listed among the places. Which place do you mean?

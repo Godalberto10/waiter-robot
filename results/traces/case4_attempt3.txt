@@ -1,0 +1,6 @@
+================================ Human Message =================================
+
+What wine do you recommend?
+================================== Ai Message ==================================
+
+I can help with that, but first, could you please tell me where the robot is currently located?

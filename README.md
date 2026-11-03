@@ -14,7 +14,7 @@ uv run evaluate   # greedy run over the 117 pairs -> "shortest routes: N/117 (P 
 uv run experiment # alpha 0.5 vs 0.1, evaluated every 100 episodes -> results/experiment.png
 ```
 
-The agent needs [Ollama](https://ollama.com) running locally with the model pulled (`ollama pull qwen2.5:7b`):
+The agent needs [Ollama](https://ollama.com) running locally with the model pulled (`ollama pull qwen2.5:14b`):
 
 ```
 uv run agent "Take this dish from the kitchen to the terrace"

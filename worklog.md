@@ -59,3 +59,19 @@ Accepted: `src/waiter_robot/agent.py` (`uv run agent "<request>"`): `create_agen
 Rejected: nothing.
 Correction requested: the tool description the LLM reads still said "Raises: ValueError", but the LLM receives an `"error: ..."` text. The tool docstring is now built from the one in `tools.py`, with "Raises" replaced by an "Errors" section that describes the text. A new test checks the description contains "error:" and no longer contains "Raises"; it caught a first attempt that kept both sections (Python 3.13+ strips docstring indentation, fixed with `inspect.cleandoc`).
 Closing check: `uv run pytest` → 33 passed, also with the network blocked (no Ollama, no token). The double tests the agent's code, not the model's judgement; that is measured in H6.
+
+## H5 reopened · system prompt and model (2026-11-03)
+
+Command: /evaluate-agent showed failures with the real model; each one was fixed first in CLAUDE.md ("LLM agent (R5)", by hand) and then in `SYSTEM_PROMPT`.
+Accepted, in order: (1) rule 1 "call list_places before answering or asking anything" and rule 3 "terrace is the terrace door"; (2) the rules rewritten as an ordered procedure (steps 1-5); (3) model changed from `qwen2.5:7b` to `qwen2.5:14b` (also in `README.md` and `.claude/commands/evaluate-agent.md`), with step 4 asking to describe the route in words; (4) step 1 defines "moving the robot" (any request to take something or send the robot somewhere, even to a place that does not exist) and step 4 asks only for steps and return, without describing the route.
+Rejected: few-shot examples in the prompt (using the evaluation requests as examples would invalidate the evaluation); adding a text route to `run_policy` (it would reopen H4).
+Correction requested: the route described in words was invented by the model in attempts 3 and 4, against "the LLM gives no figures of its own"; the answer now only gives steps and return, and the full path stays in the tool result.
+Closing check: `uv run pytest` → 33 passed after every change. The agent `ScriptedModel` tests do not depend on the prompt wording.
+
+## H6 · real model and evaluation (2026-11-03)
+
+Command: /evaluate-agent (five attempts; the last one ran all four cases even if one failed, as agreed beforehand).
+Accepted: `results/cases.md` with the table of the four cases and a summary of the five attempts; traces in `results/traces/` (`case1-4.txt` for the final attempt, `_attemptN` suffix for the earlier ones).
+Rejected: a sixth attempt; the closing criterion is the table and two real traces, and every prompt change so far fixed one case and changed another.
+Correction requested: none on the code; see H5 reopened for the prompt and model changes.
+Closing check: final attempt (`qwen2.5:14b`) meets 3 of 4 cases. Case 1: `list_places` → `run_policy(0, 0, "T")` → "13 steps". Case 2 fails: answer in Thai describing the procedure, no tool called. Case 3: asks which place, no `run_policy` (but skips `list_places`). Case 4: out of scope, no tools. No answer contained a figure that did not come from a tool.
