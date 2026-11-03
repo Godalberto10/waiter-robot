@@ -1,0 +1,28 @@
+[project]
+name = "waiter-robot"
+version = "0.1.0"
+description = "Waiter robot: LLM agent plus Q-learning table that routes dishes between kitchen, bar and terrace door."
+readme = "README.md"
+authors = [
+    { name = "Alberto Olmos (Godalberto10)" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "gymnasium>=1.4.0",
+    "langchain>=1.4.8",
+    "langchain-ollama>=1.1.0",
+    "matplotlib>=3.11.2",
+    "numpy>=2.5.4",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.9,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]
+
+[tool.pytest.ini_options]
+filterwarnings = ["ignore::DeprecationWarning:langsmith.*"]
