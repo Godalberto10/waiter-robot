@@ -43,3 +43,11 @@ Accepted: `src/waiter_robot/experiment.py` (`uv run experiment`), which reuses `
 Rejected: nothing.
 Correction requested: none.
 Closing check: plot with two curves (30 points each). Output: α = 0.5 first reaches 95 % at block 9 (900 episodes) and stays at 100 % from 1200; α = 0.1 never reaches 95 % (peak 90.6 %, final 86.3 %). `q_table.npy` unchanged (same md5); `uv run pytest` → 19 passed.
+
+## H4 · tools (2026-11-03)
+
+Command: /tools
+Accepted: `src/waiter_robot/tools.py` with `list_places()` (place names in a dict in `tools.py`, since the map only has letters) and `run_policy(start_row, start_col, destination)`, which validates before moving, places the robot with `reset(options=...)` and only uses `best_action`; the Q table is loaded once with `np.load`. English docstrings tell the LLM to call `list_places` first and to use only the figures `run_policy` returns. `tests/test_tools.py` with 10 tests: the exact `list_places` list, one per `ValueError` case (off the map, table, danger, "X" and "t", start = destination), K→T with `update` patched to fail, and B→K, B→T.
+Rejected: nothing.
+Correction requested: none. Claude Code fixed two bugs of its first version: the Q table variable was called `TABLE` and shadowed the `TABLE = "#"` constant, so the table check never fired (caught by the table test; renamed to `QTABLE`); and the tools env is created with `disable_env_checker=True`, because the passive checker broke the next `step` after a `reset` that raised (the env is still checked with `check_env` in `test_env.py`). Extra check outside the contract: non-integer row or column raises `ValueError`, in case the LLM passes text.
+Closing check: `run_policy(0, 0, "T")` → reached, 13 steps, return 8.0, 14 cells from [0, 0] to [5, 8]; `uv run pytest` → 29 passed.
