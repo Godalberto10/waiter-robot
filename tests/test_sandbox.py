@@ -76,3 +76,37 @@ def test_moved_table_breaks_the_original_table_but_not_a_retrained_one() -> None
     }));
     """)
     assert result == {"original": False, "retrained": 8, "bfs": 8}
+
+
+# H12: sliders and the info panel.
+
+def test_low_alpha_still_learns_and_reports_its_effort() -> None:
+    result = node("""
+    const blocks = [...S.trainBlocks(g, {alpha: 0.1, max: 5000})];
+    const last = blocks.at(-1);
+    console.log(JSON.stringify({first: blocks[0].curve[0], last: last.curve.at(-1), n: last.curve.length,
+      episodes: last.episodes, steps: last.randomSteps, grows: blocks.every((b, i) => i === 0 || b.randomSteps > blocks[i - 1].randomSteps)}));
+    """)
+    assert result["last"] > result["first"]          # it improves over the first block
+    assert result["n"] == result["episodes"] // 100   # one curve point per block of 100 games
+    assert result["grows"] and result["steps"] >= 100 * result["episodes"] // 100  # at least one move per game
+
+
+def test_training_never_changes_the_original_table() -> None:
+    same = node("""
+    const before = JSON.stringify(window.VIZ_DATA.q);
+    const orig = S.QTable.from(window.VIZ_DATA.q), copy = Float64Array.from(orig.q);
+    for (const a of [0.1, 0.5, 1.0]) for (const b of S.trainBlocks(g, {alpha: a, max: 1000})) {}
+    console.log(JSON.stringify(before === JSON.stringify(window.VIZ_DATA.q) && orig.q.every((v, i) => v === copy[i])));
+    """)
+    assert same is True
+
+
+def test_cell_values_cover_every_free_cell_but_the_goal() -> None:
+    result = node("""
+    let last; for (const b of S.trainBlocks(g)) last = b;
+    const v = S.cellValues(g, last.table, "T");
+    console.log(JSON.stringify({n: v.length, nearGoal: v.find(c => c.r === 4 && c.c === 8)}));
+    """)
+    assert result["n"] == 39
+    assert result["nearGoal"]["action"] == 2 and result["nearGoal"]["value"] == 20  # one step down to T: +20

@@ -143,6 +143,7 @@ Each milestone has a command in `.claude/commands/`; it is closed when its crite
 | H9 | `/sandbox` | `viz/sandbox-core.js`, `viz/sandbox.html`, `tests/test_sandbox.py` | JS env matches the step tuples; JS training reaches 117/117 on the original map |
 | H10 | `/reinforce-agent` | `agent.py`, `tests/test_agent.py`, `results/cases.md`, `results/traces/` | double tests for places and retry pass; attempt 6 with the real model recorded |
 | H11 | `/seeds` | `experiment.py`, `tests/test_experiment.py`, `results/experiment_seeds.png` | plot with mean and min-max band over 5 seeds for both α |
+| H12 | `/sandbox-teach` | `viz/sandbox-core.js`, `viz/sandbox.html`, `tests/test_sandbox.py` | other α still reaches all pairs; the original table never changes; both modes work |
 
 ## 3D visualization (extra, H8)
 - Not required by the assignment: it shows the trained policy and the agent cases. It never retrains `q_table.npy` and never calls the LLM.
@@ -166,3 +167,8 @@ Each milestone has a command in `.claude/commands/`; it is closed when its crite
   - A move is accepted only if every free cell stays connected to the three places (BFS); otherwise the piece goes back and a message says why.
   - For the chosen start and destination, three robots: the original table (`q_table.npy`, exported to `viz/data.js`), a table retrained in the browser on the edited map (blocks of 100 episodes until 100 % of the pairs follow the shortest route, at most 5000; the page shows the episodes used), and the BFS route.
 - Tests (`tests/test_sandbox.py`, run with Node; skipped if Node is missing): the JS `step` gives the five tuples of "States and environment"; JS training on the original map reaches 117/117; a person placement that isolates a cell is rejected.
+- H12 (teaching extras, sandbox only; `viz/index.html` keeps showing the evaluated Python results):
+  - sliders for α (0.05-1), γ (0.5-0.99) and the episode cap (500-5000), each with a plain-language line; changing one retrains;
+  - two modes: "Watch it learn" (play/pause/speed, one block of 100 episodes per tick; the floor is coloured by the best Q value of each cell for the chosen destination, arrows show `best_action`, and a test robot runs after each block) and "Already learned" (trains at once, then the three robots);
+  - the three robots start one after another in separate lanes of the cell, each with a label;
+  - an info panel for non-technical users: episodes, training time, random steps taken, routes correct out of all pairs, a mini learning curve (% per block), steps and return of each robot, and a sentence explaining what is happening.

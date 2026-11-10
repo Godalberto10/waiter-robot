@@ -106,17 +106,32 @@
     }
   }
 
-  // Random actions; update receives terminated, never truncated.
+  // Random actions; update receives terminated, never truncated. Returns the number of steps taken.
   function train(env, table, episodes) {
+    let steps = 0;
     for (let e = 0; e < episodes; e++) {
       let s = env.reset(), done = false;
       while (!done) {
         const a = Math.floor(env.random() * 4);
         const [s2, r, terminated, truncated] = env.step(a);
         table.update(s, a, r, s2, terminated);
-        s = s2; done = terminated || truncated;
+        s = s2; done = terminated || truncated; steps++;
       }
     }
+    return steps;
+  }
+
+  // H12: best Q value and best action of every free cell for one destination (what the table "knows").
+  function cellValues(grid, table, letter) {
+    const dest = grid.destinations.indexOf(letter), goal = grid.places[letter], out = [];
+    for (const [r, c] of grid.freeCells()) {
+      if (r === goal[0] && c === goal[1]) continue;
+      const s = grid.encode(r, c, dest);
+      let best = table.q[s * table.nA];
+      for (let a = 1; a < table.nA; a++) best = Math.max(best, table.q[s * table.nA + a]);
+      out.push({ r, c, value: best, action: table.bestAction(s) });
+    }
+    return out;
   }
 
   // Follows table.bestAction from start; same format as run_policy.
@@ -185,15 +200,20 @@
   function* trainBlocks(grid, { alpha = 0.5, gamma = 0.9, seed = 0, block = 100, max = 5000 } = {}) {
     const env = new Env(grid, rng(seed));
     const table = new QTable(env.nStates, 4, alpha, gamma);
-    let episodes = 0, score = { good: 0, total: 1 };
+    let episodes = 0, randomSteps = 0, ms = 0, score = { good: 0, total: 1 };
+    const curve = [];
     while (episodes < max && score.good < score.total) {
-      train(env, table, block); episodes += block;
+      const t0 = Date.now();
+      randomSteps += train(env, table, block); episodes += block;
+      ms += Date.now() - t0;  // training time only, not evaluation
       score = evaluate(grid, table);
-      yield { episodes, ...score, table, done: score.good === score.total || episodes >= max };
+      curve.push(100 * score.good / score.total);
+      yield { episodes, ...score, table, randomSteps, ms, curve: curve.slice(),
+              done: score.good === score.total || episodes >= max };
     }
   }
 
-  const api = { MOVES, PERSON, rng, Grid, Env, QTable, train, rollout, bfs, bfsPath, evaluate, isConnected, trainBlocks };
+  const api = { MOVES, PERSON, rng, Grid, Env, QTable, train, rollout, bfs, bfsPath, evaluate, isConnected, trainBlocks, cellValues };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.SandboxCore = api;
 })(typeof window !== "undefined" ? window : globalThis);

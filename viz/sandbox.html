@@ -13,34 +13,48 @@
   html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
     font: 14px/1.45 system-ui, "Segoe UI", sans-serif; }
   #app { display: flex; height: 100%; }
-  #panel { width: 370px; flex: none; background: var(--panel); border-right: 1px solid var(--line); padding: 18px 18px 24px; overflow-y: auto; }
+  #panel { width: 390px; flex: none; background: var(--panel); border-right: 1px solid var(--line); padding: 16px 16px 24px; overflow-y: auto; }
   #view { position: relative; flex: 1; min-width: 0; }
   #view canvas { display: block; touch-action: none; }
   h1 { font-size: 19px; margin: 0; }
-  .sub { color: var(--muted); margin: 2px 0 12px; font-size: 12.5px; }
-  .note { font-size: 12.5px; color: var(--muted); background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
-  button { font: inherit; color: var(--text); background: var(--panel-2); border: 1px solid var(--line); border-radius: 7px; padding: 6px 9px; cursor: pointer; }
+  .sub { color: var(--muted); margin: 2px 0 10px; font-size: 12.5px; }
+  details.note { font-size: 12.5px; color: var(--muted); background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; }
+  details.note summary { cursor: pointer; color: var(--text); }
+  button { font: inherit; color: var(--text); background: var(--panel-2); border: 1px solid var(--line); border-radius: 7px; padding: 5px 9px; cursor: pointer; }
   button:hover { border-color: #4a5266; }
   button.on { background: #2d3a55; border-color: var(--blue); }
-  .group { margin: 12px 0; }
+  .group { margin: 11px 0; }
   .label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 5px; }
-  .row { display: flex; gap: 5px; flex-wrap: wrap; }
+  .row { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+  .slider { display: grid; grid-template-columns: 64px 1fr 44px; gap: 8px; align-items: center; margin-top: 6px; }
+  .slider input { width: 100%; accent-color: var(--blue); }
+  .slider b { text-align: right; font-variant-numeric: tabular-nums; }
+  .help { font-size: 12px; color: var(--muted); margin: 1px 0 4px 72px; }
   .card { background: var(--panel-2); border: 1px solid var(--line); border-radius: 9px; padding: 9px 11px; margin-top: 8px; }
   .card h3 { margin: 0 0 4px; font-size: 13px; display: flex; align-items: center; gap: 7px; }
   .kv { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: 13px; }
   .kv span:nth-child(odd) { color: var(--muted); }
-  .dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .stat { background: #161920; border-radius: 7px; padding: 6px 8px; }
+  .stat .v { font-size: 17px; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .stat .k { font-size: 11.5px; color: var(--muted); }
+  .dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; flex: none; }
   .badge { display: inline-block; padding: 0 7px; border-radius: 99px; font-size: 12px; font-weight: 600; }
   .yes { background: rgba(63,179,127,.18); color: var(--green); }
   .no { background: rgba(224,86,91,.18); color: var(--red); }
-  .bar { height: 8px; background: #161920; border-radius: 99px; overflow: hidden; margin-top: 6px; }
-  .bar > div { height: 100%; width: 0; background: var(--blue); transition: width .1s; }
-  #msg { margin-top: 10px; font-size: 13px; min-height: 1.4em; }
+  #story { font-size: 13.5px; line-height: 1.5; background: #1f2a3d; border: 1px solid #2f4466; border-radius: 9px; padding: 9px 11px; margin-top: 10px; }
+  #curve { width: 100%; height: 74px; display: block; margin-top: 6px; }
+  #msg { margin-top: 8px; font-size: 13px; min-height: 1.3em; }
   #msg.err { color: var(--red); } #msg.ok { color: var(--green); }
-  #hud { position: absolute; left: 14px; top: 12px; background: rgba(18,20,26,.78); border: 1px solid var(--line);
+  #hud { position: absolute; left: 14px; top: 12px; background: rgba(18,20,26,.8); border: 1px solid var(--line);
     border-radius: 8px; padding: 6px 10px; font-size: 13px; pointer-events: none; }
+  #legend { position: absolute; left: 14px; bottom: 14px; background: rgba(18,20,26,.8); border: 1px solid var(--line);
+    border-radius: 8px; padding: 7px 10px; font-size: 12px; pointer-events: none; }
+  #legend .bar { width: 180px; height: 9px; border-radius: 99px; margin: 4px 0 2px; background: linear-gradient(90deg, #c9534f, #cdb894, #2fa36b); }
+  #legend .ends { display: flex; justify-content: space-between; color: var(--muted); }
+  label.check { font-size: 13px; display: flex; gap: 6px; align-items: center; margin-top: 8px; cursor: pointer; }
   a { color: #8fb6ff; }
-  @media (max-width: 760px) { #app { flex-direction: column; } #panel { width: 100%; max-height: 48%; border-right: 0; border-bottom: 1px solid var(--line); } }
+  @media (max-width: 760px) { #app { flex-direction: column; } #panel { width: 100%; max-height: 50%; border-right: 0; border-bottom: 1px solid var(--line); } }
 </style>
 <script src="data.js"></script>
 <script src="scene.js"></script>
@@ -56,19 +70,54 @@
 <div id="app">
   <aside id="panel">
     <h1>Map sandbox</h1>
-    <p class="sub">Topic 7 · move tables and guests, retrain, compare · <a href="index.html">evaluated view</a></p>
-    <p class="note">Drag a <b>table</b> to another free cell, or drag a <b>guest</b> from the tray on the right onto the floor (drag it back to remove it). Click a free cell to set the robot's start. Edits live only in this page: <code>data/map.txt</code> and <code>q_table.npy</code> do not change. The environment and training run here in JavaScript, not in the evaluated Python code.</p>
+    <p class="sub">Topic 7 · how a robot learns its way around · <a href="index.html">evaluated view</a></p>
+    <details class="note"><summary>How to use it</summary>
+      Drag a <b>table</b> to another free cell, or drag a <b>guest</b> from the tray on the right onto the floor (drag it back to remove it). Moves that would leave a spot unreachable are refused. Click a free cell to choose where the robot starts. Everything happens only in this page: <code>data/map.txt</code> and <code>q_table.npy</code> do not change, and the learning runs here in JavaScript, not in the evaluated Python code.
+    </details>
+
+    <div class="group"><div class="label">Mode</div>
+      <div class="row"><button data-mode="watch">Watch it learn</button><button data-mode="learned">Already learned</button></div>
+    </div>
+    <div class="group" id="playGroup"><div class="row">
+      <button id="play">⏸ Pause</button>
+      <span class="label" style="margin:0 0 0 6px">speed</span>
+      <button data-speed="1">1×</button><button data-speed="3">3×</button><button data-speed="10">10×</button>
+    </div></div>
+
+    <div class="group"><div class="label">Learning settings</div>
+      <div class="slider"><span>α</span><input id="alpha" type="range" min="0.05" max="1" step="0.05"><b id="alphaV"></b></div>
+      <div class="help" id="alphaHelp"></div>
+      <div class="slider"><span>γ</span><input id="gamma" type="range" min="0.5" max="0.99" step="0.01"><b id="gammaV"></b></div>
+      <div class="help" id="gammaHelp"></div>
+      <div class="slider"><span>max ep.</span><input id="cap" type="range" min="500" max="5000" step="100"><b id="capV"></b></div>
+      <div class="help">The most practice games the robot may play before we stop it.</div>
+    </div>
+
     <div class="group"><div class="label">Destination</div><div class="row" id="dests"></div></div>
-    <div class="row"><button id="replay">Replay</button><button id="reset">Reset map</button></div>
+    <div class="row"><button id="replay">Replay robots</button><button id="reset">Reset map</button></div>
+    <label class="check"><input type="checkbox" id="showKnow" checked> Show what the table knows (colours and arrows)</label>
     <div id="msg"></div>
+
+    <div id="story"></div>
+
     <div class="card">
-      <h3>Retraining on this map</h3>
-      <div class="kv"><span>episodes</span><span id="eps">–</span><span>shortest routes</span><span id="score">–</span></div>
-      <div class="bar"><div id="bar"></div></div>
+      <h3>Learning</h3>
+      <div class="stats">
+        <div class="stat"><div class="v" id="eps">–</div><div class="k">practice games (episodes)</div></div>
+        <div class="stat"><div class="v" id="score">–</div><div class="k">routes it gets right</div></div>
+        <div class="stat"><div class="v" id="steps">–</div><div class="k">random moves tried</div></div>
+        <div class="stat"><div class="v" id="ms">–</div><div class="k">time spent learning</div></div>
+      </div>
+      <svg id="curve" viewBox="0 0 300 74" preserveAspectRatio="none"></svg>
+      <div class="hint" style="font-size:11.5px;color:var(--muted)">% of routes right after each block of 100 games · dashed line: 95 %</div>
     </div>
     <div id="cards"></div>
   </aside>
-  <main id="view"><div id="hud"></div></main>
+  <main id="view"><div id="hud"></div>
+    <div id="legend">What the table knows about each cell
+      <div class="bar"></div><div class="ends"><span>bad (fryers)</span><span>nothing yet</span><span>leads to goal</span></div>
+    </div>
+  </main>
 </div>
 
 <script type="module">
@@ -82,17 +131,19 @@ const ORIGINAL = new C.Grid(D.map);
 const ORIG_TABLE = C.QTable.from(D.q);  // q_table.npy, trained on the original map
 const NAMES = Object.fromEntries(D.places.map(p => [p.letter, p.name]));
 const ROBOTS = [
-  { id: "orig", name: "Original table (q_table.npy)", color: 0xe0565b, css: "var(--red)", offset: -0.22 },
-  { id: "new", name: "Table retrained on this map", color: 0x2a78d6, css: "var(--blue)", offset: 0 },
-  { id: "bfs", name: "BFS (shortest route)", color: 0xe8e4da, css: "var(--white)", offset: 0.22 },
+  { id: "orig", name: "Original table (q_table.npy)", tag: "original", color: 0xe0565b, css: "var(--red)", offset: -0.27, delay: 0 },
+  { id: "new", name: "Table retrained on this map", tag: "retrained", color: 0x2a78d6, css: "var(--blue)", offset: 0, delay: 0.6 },
+  { id: "bfs", name: "BFS (shortest route, knows the map)", tag: "BFS", color: 0xe8e4da, css: "var(--white)", offset: 0.27, delay: 1.2 },
 ];
-const MAX_EPISODES = 5000, TRAY_X = COLS / 2 + 1.25, GUESTS = 5;
+const TRAY_X = COLS / 2 + 1.25, GUESTS = 5, ROBOT_SCALE = 0.62;
+const TICK_MS = { 1: 650, 3: 220, 10: 60 };
 
 // ---------- scene ----------
 const view = document.getElementById("view");
 const { renderer, scene, camera, controls } = W.setup(view);
 camera.position.set(1.2, 9.8, 8.6); controls.target.set(0.8, 0, 0.3);
 const tiles = W.floor(scene);
+tiles.forEach(t => { t.material = t.material.clone(); t.userData.base = t.material.color.clone(); });
 const fryerOils = [];
 for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
   if (D.map[r][c] === "~") { const f = W.makeFryer(); f.position.set(x(c), 0, z(r)); scene.add(f); fryerOils.push(f.userData.oil); }
@@ -124,16 +175,27 @@ function buildPieces() {
   for (let i = 0; i < GUESTS; i++) addPiece("person", W.makePerson(SHIRTS[i]), null, null, i);
 }
 
-const robots = Object.fromEntries(ROBOTS.map(R => [R.id, W.makeRobot(scene, R.color)]));
+// three smaller robots, each with a floating label so they never look like one
+const robots = Object.fromEntries(ROBOTS.map((R, i) => {
+  const rb = W.makeRobot(scene, R.color);
+  rb.scale.setScalar(ROBOT_SCALE);
+  // labels at three heights, so they never cover each other when the robots are side by side
+  const tag = W.label(R.tag); tag.scale.set(1.2 / ROBOT_SCALE, 0.27 / ROBOT_SCALE, 1); tag.position.y = (1.0 + 0.36 * i) / ROBOT_SCALE; rb.add(tag);
+  rb.visible = false;
+  return [R.id, rb];
+}));
 const overlay = new THREE.Group(); scene.add(overlay);
+const arrowsGroup = new THREE.Group(); scene.add(arrowsGroup);
 const hover = new THREE.Mesh(new THREE.RingGeometry(0.36, 0.46, 40), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8, side: THREE.DoubleSide }));
 hover.rotation.x = -Math.PI / 2; hover.visible = false; scene.add(hover);
 
 // ---------- state ----------
-const S = { grid: ORIGINAL, dest: "T", start: [0, 0], table: null, training: null, runners: [] };
+const S = { grid: ORIGINAL, dest: "T", start: [0, 0], table: null, run: null, last: null, runners: [],
+            mode: "watch", playing: true, speed: 3, alpha: 0.5, gamma: 0.9, cap: 3000, showKnow: true, timer: null };
 const $ = id => document.getElementById(id);
 const say = (text, cls = "") => { $("msg").textContent = text; $("msg").className = cls; };
 const badge = ok => `<span class="badge ${ok ? "yes" : "no"}">${ok ? "yes" : "no"}</span>`;
+const edited = () => S.grid.rows.join("") !== ORIGINAL.rows.join("");
 
 function validStart() {
   const g = S.grid, goal = g.places[S.dest];
@@ -141,50 +203,157 @@ function validStart() {
   if (!ok(S.start)) S.start = g.destinations.map(l => g.places[l]).find(ok) || g.freeCells().find(ok);
 }
 
-function renderDests() {
-  $("dests").innerHTML = ORIGINAL.destinations.map(l => `<button data-dest="${l}" class="${l === S.dest ? "on" : ""}">${l} · ${NAMES[l]}</button>`).join("");
+// ---------- plain-language texts ----------
+function alphaHelp(a) {
+  if (a >= 0.7) return "How much each new experience changes what it knows. Very high: learns fast, but every new try overwrites the old.";
+  if (a >= 0.3) return "How much each new experience changes what it knows. Medium: learns fast and steadily (0.5 is the value we used).";
+  return "How much each new experience changes what it knows. Low: very careful, so it needs many more games to learn.";
+}
+function gammaHelp(g) {
+  if (g >= 0.85) return "How much it cares about the future. High: a reward 13 steps away still counts, so long routes are learned.";
+  return "How much it cares about the future. Low: only rewards that are close count; far cells may never learn the way.";
 }
 
-// Retrain on the current map, one block of 100 episodes per frame so the page stays responsive.
-function retrain() {
-  const run = C.trainBlocks(S.grid, { max: MAX_EPISODES });
-  S.training = run; S.table = null;
-  S.runners = []; Object.values(robots).forEach(rb => { rb.visible = false; });
-  W.clear(overlay); $("cards").innerHTML = "";
-  const tick = () => {
-    if (S.training !== run) return;  // a newer edit started another training
-    const { value, done } = run.next();
-    if (value) {
-      $("eps").textContent = value.episodes;
-      $("score").innerHTML = `${value.good}/${value.total} ${badge(value.good === value.total)}`;
-      $("bar").style.width = `${100 * value.episodes / MAX_EPISODES}%`;
-      S.table = value.table;
-    }
-    if (done || value.done) { S.training = null; showRoutes(); } else setTimeout(tick, 0);
-  };
-  tick();
+function story() {
+  const L = S.last;
+  if (!L) return "";
+  const dest = NAMES[S.dest];
+  if (S.run) {
+    return `<b>Learning…</b> After ${L.episodes} practice games the robot has made ${L.randomSteps.toLocaleString("en")} random moves. ` +
+      `It now knows the shortest way for <b>${L.good} of ${L.total}</b> trips. On the floor, green spreads out from the ${dest}: ` +
+      `each time the robot stumbles into the goal, the +20 reward is passed back to the cells it came from.`;
+  }
+  const cap = L.good < L.total ? ` It stopped at the limit of ${S.cap} games with ${L.good} of ${L.total} trips right: try a higher α or more games.` : "";
+  const learned = `It took <b>${L.episodes} practice games</b> (${L.ms} ms) to learn every trip on this map.${cap}`;
+  const R = S.routes;
+  if (!R) return learned;
+  if (!edited()) return `${learned} The map is the original one, so the original table works too: all three robots arrive.`;
+  if (!R.orig.reached) return `${learned} <b>The red robot gets stuck:</b> its table was learned with the furniture somewhere else, so it keeps walking into something that is now in its way. The blue one learned this map and arrives in ${R.new.steps} steps, like the shortest route.`;
+  if (R.orig.steps > R.bfs.steps) return `${learned} <b>The red robot arrives, but with ${R.orig.steps - R.bfs.steps} extra steps:</b> it never learned the new shortcut. The blue one did.`;
+  return `${learned} The change did not affect this trip, so the original table still finds the shortest way here. Try another start or move a table onto its path.`;
+}
+
+function curveSvg(curve) {
+  if (!curve?.length) return "";
+  const n = Math.max(curve.length, 2), px = i => 4 + (292 * i) / (n - 1), py = v => 70 - (66 * v) / 100;
+  const pts = curve.map((v, i) => `${px(i).toFixed(1)},${py(v).toFixed(1)}`).join(" ");
+  return `<line x1="4" x2="296" y1="${py(95)}" y2="${py(95)}" stroke="#6b6f7b" stroke-dasharray="4 3" stroke-width="1"/>
+    <polyline points="${pts}" fill="none" stroke="#2a78d6" stroke-width="2.2" stroke-linejoin="round"/>
+    <circle cx="${px(curve.length - 1)}" cy="${py(curve.at(-1))}" r="3" fill="#2a78d6"/>`;
+}
+
+function renderPanel() {
+  const L = S.last;
+  $("eps").textContent = L ? L.episodes.toLocaleString("en") : "–";
+  $("score").innerHTML = L ? `${L.good}/${L.total}` : "–";
+  $("steps").textContent = L ? L.randomSteps.toLocaleString("en") : "–";
+  $("ms").textContent = L ? `${L.ms} ms` : "–";
+  $("curve").innerHTML = L ? curveSvg(L.curve) : "";
+  $("story").innerHTML = story();
+  document.querySelectorAll("[data-mode]").forEach(b => b.classList.toggle("on", b.dataset.mode === S.mode));
+  document.querySelectorAll("[data-speed]").forEach(b => b.classList.toggle("on", Number(b.dataset.speed) === S.speed));
+  $("playGroup").style.display = S.mode === "watch" ? "" : "none";
+  $("play").textContent = S.playing ? "⏸ Pause" : "▶ Play";
+  $("dests").innerHTML = ORIGINAL.destinations.map(l => `<button data-dest="${l}" class="${l === S.dest ? "on" : ""}">${l} · ${NAMES[l]}</button>`).join("");
+  $("alpha").value = S.alpha; $("alphaV").textContent = S.alpha.toFixed(2); $("alphaHelp").textContent = alphaHelp(S.alpha);
+  $("gamma").value = S.gamma; $("gammaV").textContent = S.gamma.toFixed(2); $("gammaHelp").textContent = gammaHelp(S.gamma);
+  $("cap").value = S.cap; $("capV").textContent = S.cap;
+  $("legend").style.display = S.showKnow ? "" : "none";
+}
+
+// ---------- what the table knows: coloured floor and arrows ----------
+const BAD = new THREE.Color(0xc9534f), GOOD = new THREE.Color(0x2fa36b);
+function showKnowledge() {
+  W.clear(arrowsGroup);
+  tiles.forEach(t => t.material.color.copy(t.userData.base));
+  if (!S.showKnow || !S.table) return;
+  const byCell = new Map(C.cellValues(S.grid, S.table, S.dest).map(v => [`${v.r},${v.c}`, v]));
+  for (const t of tiles) {
+    const v = byCell.get(`${t.userData.r},${t.userData.c}`);
+    if (!v) continue;
+    const k = Math.max(-1, Math.min(1, v.value / 20));
+    t.material.color.copy(t.userData.base).lerp(k >= 0 ? GOOD : BAD, Math.abs(k) * 0.85);
+    if (v.value === 0) continue;  // never updated yet: no arrow
+    const [dr, dc] = C.MOVES[v.action];
+    const dir = new THREE.Vector3(dc, 0, dr);
+    arrowsGroup.add(new THREE.ArrowHelper(dir, new THREE.Vector3(x(v.c) - dc * 0.24, 0.1, z(v.r) - dr * 0.24), 0.48, 0x1b1d24, 0.18, 0.14));
+  }
+}
+
+// ---------- robots ----------
+class Delayed {  // a Runner that waits `delay` seconds before moving
+  constructor(runner, delay) { this.runner = runner; this.delay = delay; }
+  update(dt) { if (this.delay > 0) { this.delay -= dt; this.runner.pose(0); } else this.runner.update(dt); }
+  get done() { return this.runner.done; }
+}
+function hideRobots() { Object.values(robots).forEach(rb => { rb.visible = false; }); S.runners = []; }
+
+function bfsRoute(g) {
+  const path = C.bfsPath(g, S.start, S.dest), steps = path.length - 1;
+  return { reached: true, steps, return: -(steps - 1) + 20, path };
+}
+
+// While learning: only a blue test robot, with the current (half-learned) table.
+function testRobot() {
+  validStart();
+  W.clear(overlay); hideRobots();
+  const g = S.grid, goal = g.places[S.dest]; W.marker(overlay, goal[0], goal[1], 0xffffff);
+  const route = C.rollout(g, S.table, S.start, S.dest);
+  W.trail(overlay, route.path, 0x2a78d6);
+  S.runners = [new Delayed(new W.Runner(robots.new, route.path, 0, 4.2 * Math.max(1, S.speed / 2)), 0)];
+  $("hud").textContent = `test robot: ${route.reached ? `arrives in ${route.steps} steps` : "does not arrive yet"}`;
 }
 
 function showRoutes() {
   if (!S.table) return;
   validStart();
   const g = S.grid, dist = C.bfs(g, g.places[S.dest]).get(S.start.join(","));
-  const routes = {
-    orig: C.rollout(g, ORIG_TABLE, S.start, S.dest),
-    new: C.rollout(g, S.table, S.start, S.dest),
-    bfs: (() => { const path = C.bfsPath(g, S.start, S.dest); const steps = path.length - 1; return { reached: true, steps, return: -(steps - 1) + 20, path }; })(),
-  };
+  const routes = { orig: C.rollout(g, ORIG_TABLE, S.start, S.dest), new: C.rollout(g, S.table, S.start, S.dest), bfs: bfsRoute(g) };
+  S.routes = routes;
   const origScore = C.evaluate(g, ORIG_TABLE);
-  W.clear(overlay);
+  W.clear(overlay); hideRobots();
   const goal = g.places[S.dest]; W.marker(overlay, goal[0], goal[1], 0xffffff);
-  S.runners = ROBOTS.map(R => { W.trail(overlay, routes[R.id].path, R.color, R.offset); return new W.Runner(robots[R.id], routes[R.id].path, R.offset); });
+  S.runners = ROBOTS.map(R => {
+    W.trail(overlay, routes[R.id].path, R.color, R.offset);
+    return new Delayed(new W.Runner(robots[R.id], routes[R.id].path, R.offset), R.delay);
+  });
   $("cards").innerHTML = ROBOTS.map(R => {
     const rt = routes[R.id], shortest = rt.reached && rt.steps === dist;
-    const extra = R.id === "orig" ? `<span>on this map</span><span>${origScore.good}/${origScore.total} pairs shortest</span>` : "";
+    const extra = R.id === "orig" ? `<span>on this map</span><span>${origScore.good}/${origScore.total} trips right</span>` : "";
     return `<div class="card"><h3><span class="dot" style="background:${R.css}"></span>${R.name}</h3><div class="kv">
-      <span>reached</span><span>${badge(rt.reached)}</span><span>steps</span><span><b>${rt.steps}</b> (shortest: ${dist})</span>
+      <span>arrives</span><span>${badge(rt.reached)}</span><span>steps</span><span><b>${rt.steps}</b> (shortest: ${dist})</span>
       <span>return</span><span>${rt.return.toFixed(1)}</span><span>shortest</span><span>${badge(shortest)}</span>${extra}</div></div>`;
   }).join("");
+  renderPanel();
+}
+
+// ---------- training ----------
+function stopTimer() { clearTimeout(S.timer); S.timer = null; }
+
+function retrain() {
+  stopTimer();
+  S.run = C.trainBlocks(S.grid, { alpha: S.alpha, gamma: S.gamma, max: S.cap });
+  S.table = null; S.last = null; S.routes = null;
+  hideRobots(); W.clear(overlay); $("cards").innerHTML = "";
+  S.playing = true;
+  renderPanel();
+  step();
+}
+
+// One block of 100 games per call: right away in "Already learned", at the chosen speed in "Watch it learn".
+function step() {
+  stopTimer();
+  if (!S.run) return;
+  const run = S.run;
+  const { value, done } = run.next();
+  if (value) { S.last = value; S.table = value.table; }
+  const finished = done || value?.done;
+  if (finished) S.run = null;
+  if (S.mode === "watch") {
+    showKnowledge();
+    if (finished) showRoutes(); else { testRobot(); renderPanel(); if (S.playing) S.timer = setTimeout(step, TICK_MS[S.speed]); }
+  } else if (finished) { showKnowledge(); showRoutes(); }
+  else { renderPanel(); S.timer = setTimeout(step, 0); }
 }
 
 // ---------- editing ----------
@@ -207,12 +376,12 @@ function tryMove(p, target) {
   if (!C.isConnected(g)) {
     const reach = C.bfs(g, g.places[g.destinations[0]]);
     const cut = g.freeCells().filter(([r, c]) => !reach.has(`${r},${c}`)).map(([r, c]) => `(${r}, ${c})`);
-    say(`Blocked: ${cut.slice(0, 4).join(", ")}${cut.length > 4 ? "…" : ""} would be cut off from the places. The piece goes back.`, "err");
+    say(`Not allowed: ${cut.slice(0, 4).join(", ")}${cut.length > 4 ? "…" : ""} would become unreachable. The piece goes back.`, "err");
     return false;
   }
   if (target) { p.r = target[0]; p.c = target[1]; } else { p.r = p.c = null; }
   S.grid = g;
-  say(target ? `${p.kind === "table" ? "Table" : "Guest"} placed at (${target[0]}, ${target[1]}). Retraining…` : "Guest back in the tray. Retraining…", "ok");
+  say(target ? `${p.kind === "table" ? "Table" : "Guest"} placed at (${target[0]}, ${target[1]}). The robot has to learn this new map.` : "Guest back in the tray. Learning again.", "ok");
   return true;
 }
 
@@ -257,23 +426,34 @@ renderer.domElement.addEventListener("pointerup", e => {
   const { r, c } = t.object.userData, goal = S.grid.places[S.dest];
   if (!S.grid.isFree(r, c)) { say(`(${r}, ${c}) is not free: the robot cannot start there.`, "err"); return; }
   if (r === goal[0] && c === goal[1]) { say(`(${r}, ${c}) is already the destination.`, "err"); return; }
-  S.start = [r, c]; say(`Start set to (${r}, ${c}).`, "ok"); showRoutes();
+  S.start = [r, c]; say(`The robot now starts at (${r}, ${c}).`, "ok");
+  if (S.run) testRobot(); else showRoutes();
 });
 
-document.getElementById("panel").addEventListener("click", e => {
+// ---------- controls ----------
+$("panel").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
-  if (b.dataset.dest) { S.dest = b.dataset.dest; renderDests(); showRoutes(); }
-  if (b.id === "replay") showRoutes();
-  if (b.id === "reset") { S.grid = ORIGINAL; buildPieces(); say("Original map restored. Retraining…", "ok"); retrain(); }
+  if (b.dataset.mode) { S.mode = b.dataset.mode; retrain(); }
+  if (b.dataset.speed) { S.speed = Number(b.dataset.speed); renderPanel(); }
+  if (b.dataset.dest) { S.dest = b.dataset.dest; showKnowledge(); if (S.run) testRobot(); else showRoutes(); renderPanel(); }
+  if (b.id === "play") { S.playing = !S.playing; renderPanel(); if (S.playing) step(); else stopTimer(); }
+  if (b.id === "replay") { if (S.run) testRobot(); else showRoutes(); }
+  if (b.id === "reset") { S.grid = ORIGINAL; buildPieces(); say("Original map restored.", "ok"); retrain(); }
 });
+for (const [id, key, parse] of [["alpha", "alpha", parseFloat], ["gamma", "gamma", parseFloat], ["cap", "cap", v => parseInt(v, 10)]]) {
+  $(id).addEventListener("input", e => { S[key] = parse(e.target.value); renderPanel(); });
+  $(id).addEventListener("change", () => { say(`New setting: the robot starts learning from zero.`, "ok"); retrain(); });
+}
+$("showKnow").addEventListener("change", e => { S.showKnow = e.target.checked; showKnowledge(); renderPanel(); });
 
 // ---------- loop ----------
 const clock = new THREE.Clock();
 renderer.setAnimationLoop(() => {
   const dt = Math.min(clock.getDelta(), 0.05);
   S.runners.forEach(rn => rn.update(dt));
-  $("hud").textContent = S.training ? "retraining…" :
-    S.runners.map((rn, i) => `${["original", "retrained", "BFS"][i]}: ${rn.step}/${rn.path.length - 1}`).join(" · ");
+  if (!S.run && S.runners.length > 1) {
+    $("hud").textContent = S.runners.map((rn, i) => `${ROBOTS[i].tag}: ${rn.runner.step}/${rn.runner.path.length - 1}`).join(" · ");
+  }
   const flick = 0.75 + 0.25 * Math.sin(performance.now() / 180);
   fryerOils.forEach((o, i) => { o.material.emissiveIntensity = flick + 0.1 * Math.sin(i + performance.now() / 90); });
   fryerLight.intensity = 1.8 + 0.6 * flick;
@@ -282,13 +462,15 @@ renderer.setAnimationLoop(() => {
   renderer.render(scene, camera);
 });
 
-// Optional URL hash for a quick demo: #move-table moves the table at (0, 5) to (2, 5).
-buildPieces(); renderDests();
-if (location.hash === "#move-table") {
+// URL hash for quick demos: #learned, #move-table (table (0, 5) -> (2, 5), bar to kitchen).
+buildPieces();
+if (location.hash.includes("learned") || location.hash.includes("move-table")) S.mode = "learned";
+if (location.hash.includes("move-table")) {
   const p = pieces.find(q => q.r === 0 && q.c === 5);
-  S.dest = "K"; S.start = [0, 8]; renderDests();
+  S.dest = "K"; S.start = [0, 8];
   if (tryMove(p, [2, 5])) seat(p);
 }
+renderPanel();
 retrain();
 </script>
 </body>
