@@ -1,4 +1,4 @@
-# 🤖🍽️ Waiter robot
+# Waiter robot
 
 **A robot waiter that learns its way around a restaurant, and an AI assistant that understands what you ask it.**
 
@@ -7,8 +7,6 @@
 ![Gymnasium](https://img.shields.io/badge/env-Gymnasium-0081a5)
 ![Ollama qwen2.5:14b](https://img.shields.io/badge/LLM-Ollama%20qwen2.5%3A14b-black)
 ![tests 52 passed](https://img.shields.io/badge/tests-52%20passed-3fb37f)
-
-Lab Assignment II · Artificial Intelligence · CUNEF · topic 7: *waiter robot in a restaurant*.
 
 ![The agent's request "Take this dish from the kitchen to the terrace" played in 3D: 13 steps from the kitchen to the terrace door](docs/agent.png)
 
@@ -20,17 +18,17 @@ You type a request such as *"Take this dish from the kitchen to the terrace"*. T
 
 | Piece | What it does | What it does **not** do |
 |---|---|---|
-| 🧠 **LLM agent** (Ollama, `qwen2.5:14b`) | Understands the request, finds the origin and the destination, calls the tools and writes the answer | Never computes routes or invents numbers |
-| 🗺️ **Q table** (Q-learning) | Knows the best move in every cell, learned by trial and error | Does not understand language |
+| **LLM agent** (Ollama, `qwen2.5:14b`) | Understands the request, finds the origin and the destination, calls the tools and writes the answer | Never computes routes or invents numbers |
+| **Q table** (Q-learning) | Knows the best move in every cell, learned by trial and error | Does not understand language |
 
 ```mermaid
 flowchart LR
-    U["🧑 'Take this dish from<br/>the kitchen to the terrace'"] --> A["🧠 LLM agent"]
-    A -- "run_policy(0, 0, 'T')" --> P["🛠️ run_policy"]
-    P -- "best_action, step by step" --> Q["🗺️ Q table<br/>q_table.npy"]
+    U["'Take this dish from<br/>the kitchen to the terrace'"] --> A["LLM agent"]
+    A -- "run_policy(0, 0, 'T')" --> P["run_policy"]
+    P -- "best_action, step by step" --> Q["Q table<br/>q_table.npy"]
     Q --> P
     P -- "13 steps · return 8.0 · path" --> A
-    A --> R["💬 'The robot took the dish to the<br/>terrace door in 13 steps.'"]
+    A --> R["'The robot took the dish to the<br/>terrace door in 13 steps.'"]
 ```
 
 The Q table is trained **once, beforehand**, in a Gymnasium environment; the agent only reads it.
@@ -57,10 +55,10 @@ K....#..B      K  kitchen (0, 0)       #  table: the robot cannot go through
 
 | What | Result |
 |---|---|
-| 🗺️ Q table (α = 0.5, γ = 0.9, 3000 episodes, seed 0) | **117 / 117** trips by the shortest route (95 % required) |
-| 📈 Learning rate, 5 seeds | α = 0.5: every seed at 100 % from ~1200 episodes · α = 0.1: 93.8 % mean at 3000 |
-| 🧠 Agent with the real model | **4 / 4** cases (after 6 attempts, see [`results/cases.md`](results/cases.md)) |
-| ✅ Tests | **52 passed**, with no network, no Ollama and no token |
+| Q table (α = 0.5, γ = 0.9, 3000 episodes, seed 0) | **117 / 117** trips by the shortest route (95 % required) |
+| Learning rate, 5 seeds | α = 0.5: every seed at 100 % from ~1200 episodes · α = 0.1: 93.8 % mean at 3000 |
+| Agent with the real model | **4 / 4** cases (after 6 attempts, see [`results/cases.md`](results/cases.md)) |
+| Tests | **52 passed**, with no network, no Ollama and no token |
 
 <table>
 <tr>
@@ -75,12 +73,12 @@ K....#..B      K  kitchen (0, 0)       #  table: the robot cannot go through
 
 The four cases the agent is checked on:
 
-| # | Request | Expected | ✓ |
+| # | Request | Expected | Meets |
 |---|---|---|---|
-| 1 | *Take this dish from the kitchen to the terrace* | `run_policy(0, 0, "T")` → 13 steps | ✅ |
-| 2 | *The robot is at the bar; send it back to the kitchen* | `run_policy(0, 8, "K")` → 12 steps | ✅ |
-| 3 | *Take the dish from the kitchen to the storeroom* | asks which place, no `run_policy` | ✅ |
-| 4 | *What wine do you recommend?* | "not my job", no `run_policy` | ✅ |
+| 1 | *Take this dish from the kitchen to the terrace* | `run_policy(0, 0, "T")` → 13 steps | yes |
+| 2 | *The robot is at the bar; send it back to the kitchen* | `run_policy(0, 8, "K")` → 12 steps | yes |
+| 3 | *Take the dish from the kitchen to the storeroom* | asks which place, no `run_policy` | yes |
+| 4 | *What wine do you recommend?* | "not my job", no `run_policy` | yes |
 
 ---
 
@@ -97,7 +95,7 @@ uv run experiment            # 5. alpha 0.5 vs 0.1, seed 0 -> results/experiment
 uv run experiment --seeds 5  # 6. the same with seeds 0-4 -> results/experiment_seeds.png
 ```
 
-### 🧠 Talk to the robot
+### Talk to the robot
 
 Needs [Ollama](https://ollama.com) running with the model downloaded:
 
@@ -108,7 +106,7 @@ uv run agent "Take this dish from the kitchen to the terrace"
 
 It prints the whole conversation: your request, every tool call, what each tool returned and the final answer.
 
-### 🎮 See it in 3D (extra)
+### See it in 3D (extra)
 
 ```bash
 uv run export-viz   # writes viz/data.js (q_table.npy is only read)
@@ -123,7 +121,7 @@ Then open the pages with a double click (they load Three.js from a CDN, so they 
 
 ![Map sandbox: a table moved onto the robot's path; the original table gets stuck while the retrained one finds the new 8-step route](docs/sandbox.png)
 
-In the sandbox, moving a table shows the main limit of Q-learning: **the table only knows the map it was trained on.** 🔴 The original table gets stuck, 🔵 a table retrained in the browser finds the new route, and ⚪ BFS gives the shortest route for reference. The environment and training are reimplemented in JavaScript for this page (`viz/sandbox-core.js`); `data/map.txt` and `q_table.npy` never change. Its tests need [Node.js](https://nodejs.org) and are skipped without it. `viz/sandbox.html#move-table` opens this example directly.
+In the sandbox, moving a table shows the main limit of Q-learning: **the table only knows the map it was trained on.** The original table (red) gets stuck, a table retrained in the browser (blue) finds the new route, and BFS (white) gives the shortest route for reference. The environment and training are reimplemented in JavaScript for this page (`viz/sandbox-core.js`); `data/map.txt` and `q_table.npy` never change. Its tests need [Node.js](https://nodejs.org) and are skipped without it. `viz/sandbox.html#move-table` opens this example directly.
 
 ---
 
