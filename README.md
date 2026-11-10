@@ -8,6 +8,9 @@
 ![Ollama qwen2.5:14b](https://img.shields.io/badge/LLM-Ollama%20qwen2.5%3A14b-black)
 ![tests 52 passed](https://img.shields.io/badge/tests-52%20passed-3fb37f)
 
+[![Open the 3D view](https://img.shields.io/badge/Open-3D%20view-2a78d6?style=for-the-badge)](https://godalberto10.github.io/waiter-robot/viz/)
+[![Open the map sandbox](https://img.shields.io/badge/Open-map%20sandbox-3fb37f?style=for-the-badge)](https://godalberto10.github.io/waiter-robot/viz/sandbox.html)
+
 ![The agent's request "Take this dish from the kitchen to the terrace" played in 3D: 13 steps from the kitchen to the terrace door](docs/agent.png)
 
 ---
@@ -116,8 +119,8 @@ Then open the pages with a double click (they load Three.js from a CDN, so they 
 
 | Page | What you can do |
 |---|---|
-| [`viz/index.html`](viz/index.html) | **The evaluated system.** Four modes: *Route* (click a cell, watch the robot go), *Policy* (an arrow per cell), *Agent* (the 4 real cases replayed), *Compare α* (two robots side by side) |
-| [`viz/sandbox.html`](viz/sandbox.html) | **The map sandbox.** Drag tables, drop guests on the floor, change α and γ with sliders, and *Watch it learn* |
+| [`viz/index.html`](https://godalberto10.github.io/waiter-robot/viz/) | **The evaluated system.** Four modes: *Route* (click a cell, watch the robot go), *Policy* (an arrow per cell), *Agent* (the 4 real cases replayed), *Compare α* (two robots side by side) |
+| [`viz/sandbox.html`](https://godalberto10.github.io/waiter-robot/viz/sandbox.html) | **The map sandbox.** Drag tables, drop guests on the floor, change α and γ with sliders, and *Watch it learn* |
 
 ![Map sandbox: a table moved onto the robot's path; the original table gets stuck while the retrained one finds the new 8-step route](docs/sandbox.png)
 
