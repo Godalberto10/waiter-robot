@@ -2,6 +2,7 @@ import json
 import shutil
 import subprocess
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -17,7 +18,7 @@ const g = new S.Grid(window.VIZ_DATA.map);
 """
 
 
-def node(body: str):
+def node(body: str) -> Any:
     if not Path("viz/data.js").exists():
         pytest.skip("run `uv run export-viz` first")
     out = subprocess.run([NODE, "-e", PRELUDE + body], capture_output=True, text=True, check=True)

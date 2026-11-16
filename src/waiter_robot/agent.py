@@ -7,6 +7,7 @@ from langchain.agents import create_agent
 from langchain.tools import tool
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from langchain_core.runnables import Runnable
 from langchain_ollama import ChatOllama
 
 from waiter_robot.tools import list_places, run_policy
@@ -68,7 +69,7 @@ run_policy_wrapper.__doc__ = RUN_POLICY_DOC  # the description the LLM reads
 TOOLS = [tool(list_places), tool(run_policy_wrapper)]
 
 
-def build_agent(model: BaseChatModel | None = None):  # noqa: ANN201  (compiled LangGraph graph)
+def build_agent(model: BaseChatModel | None = None) -> Runnable:
     """Agent with the two tools; `model` defaults to the local Ollama model."""
     if model is None:
         model = ChatOllama(model=MODEL_NAME, temperature=0)
@@ -81,7 +82,7 @@ def names_a_tool(message: BaseMessage) -> bool:
             and any(name in str(message.content) for name in TOOL_NAMES))
 
 
-def ask(agent, request: str) -> list[BaseMessage]:  # noqa: ANN001  (compiled LangGraph graph)
+def ask(agent: Runnable, request: str) -> list[BaseMessage]:
     """Run one request; retry once if the answer describes a tool call instead of making it."""
     messages = agent.invoke({"messages": [{"role": "user", "content": request}]})["messages"]
     if names_a_tool(messages[-1]):
