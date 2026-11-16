@@ -29,7 +29,7 @@ def key(cell: tuple[int, int]) -> str:
 
 
 def table_data(table: QTable) -> dict:
-    """Best action of every free cell and route of every pair, for each destination."""
+    """Q values, best action of every free cell and route of every pair, for each destination."""
     policy, routes, good = {}, {}, 0
     for letter, goal in MAP.places.items():
         dest = MAP.destinations.index(letter)
@@ -44,7 +44,7 @@ def table_data(table: QTable) -> dict:
             route["shortest"] = route["reached"] and route["steps"] == dist[start]
             good += route["shortest"]
             routes[letter][key(start)] = route
-    return {"policy": policy, "routes": routes, "shortest": good}
+    return {"q": table.q.round(3).tolist(), "policy": policy, "routes": routes, "shortest": good}
 
 
 def parse_trace(text: str) -> dict:

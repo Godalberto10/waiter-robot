@@ -6,7 +6,7 @@
 ![uv](https://img.shields.io/badge/managed%20with-uv-de5fe9)
 ![Gymnasium](https://img.shields.io/badge/env-Gymnasium-0081a5)
 ![Ollama qwen2.5:14b](https://img.shields.io/badge/LLM-Ollama%20qwen2.5%3A14b-black)
-![tests 52 passed](https://img.shields.io/badge/tests-52%20passed-3fb37f)
+![tests 53 passed](https://img.shields.io/badge/tests-53%20passed-3fb37f)
 
 [![Open the 3D view](https://img.shields.io/badge/Open-3D%20view-2a78d6?style=for-the-badge)](https://godalberto10.github.io/waiter-robot/viz/)
 [![Open the map sandbox](https://img.shields.io/badge/Open-map%20sandbox-3fb37f?style=for-the-badge)](https://godalberto10.github.io/waiter-robot/viz/sandbox.html)
@@ -61,7 +61,7 @@ K....#..B      K  kitchen (0, 0)       #  table: the robot cannot go through
 | Q table (α = 0.5, γ = 0.9, 3000 episodes, seed 0) | **117 / 117** trips by the shortest route (95 % required) |
 | Learning rate, 5 seeds | α = 0.5: every seed at 100 % from ~1200 episodes · α = 0.1: 93.8 % mean at 3000 |
 | Agent with the real model | **4 / 4** cases (after 6 attempts, see [`results/cases.md`](results/cases.md)) |
-| Tests | **52 passed**, with no network, no Ollama and no token |
+| Tests | **53 passed**, with no network, no Ollama and no token |
 
 <table>
 <tr>
@@ -91,7 +91,7 @@ You need [uv](https://docs.astral.sh/uv/). Run every command **from the project 
 
 ```bash
 uv sync                      # 1. install Python 3.14 and the dependencies
-uv run pytest                # 2. run the 52 tests (no network, no Ollama needed)
+uv run pytest                # 2. run the 53 tests (no network, no Ollama needed)
 uv run train                 # 3. train the Q table -> q_table.npy
 uv run evaluate              # 4. check it: "shortest routes: 117/117 (100.0 %)"
 uv run experiment            # 5. alpha 0.5 vs 0.1, seed 0 -> results/experiment.png
@@ -119,8 +119,10 @@ Then open the pages with a double click (they load Three.js from a CDN, so they 
 
 | Page | What you can do |
 |---|---|
-| [`viz/index.html`](https://godalberto10.github.io/waiter-robot/viz/) | **The evaluated system.** Four modes: *Route* (click a cell, watch the robot go), *Policy* (an arrow per cell), *Agent* (the 4 real cases replayed), *Compare α* (two robots side by side) |
-| [`viz/sandbox.html`](https://godalberto10.github.io/waiter-robot/viz/sandbox.html) | **The map sandbox.** Drag tables, drop guests on the floor, change α and γ with sliders, and *Watch it learn* |
+| [`viz/index.html`](https://godalberto10.github.io/waiter-robot/viz/) | **The evaluated system.** An app with five tabs: *Route* (click a cell, watch the robot go), *Policy* (an arrow per cell), *Q table* (the four Q values of every cell for each destination and α), *Agent* (the 4 real cases replayed), *Compare α* (two robots side by side) |
+| [`viz/sandbox.html`](https://godalberto10.github.io/waiter-robot/viz/sandbox.html) | **The map sandbox.** An app with five tabs: drag tables and drop guests on the floor (*Learn*), change α and γ with sliders (*Settings*), see the three robots (*Results*), watch the *Q table* fill in live while it learns, and *Help* |
+
+![Q table tab: the four Q values of every cell towards the terrace door; the highest one is the action the robot takes](docs/qtable.png)
 
 ![Map sandbox: a table moved onto the robot's path; the original table gets stuck while the retrained one finds the new 8-step route](docs/sandbox.png)
 
@@ -147,7 +149,7 @@ waiter-robot/
 │   ├── tools.py            list_places() and run_policy()
 │   ├── agent.py            the LLM agent (LangChain + Ollama)
 │   └── export_viz.py       data for the 3D pages
-├── tests/                  52 tests, with ScriptedModel as the LLM double
+├── tests/                  53 tests, with ScriptedModel as the LLM double
 ├── q_table.npy             the trained table (162 × 4)
 ├── results/                plots, agent cases and real traces
 ├── viz/                    the two 3D pages

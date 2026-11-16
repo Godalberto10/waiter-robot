@@ -12,14 +12,40 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
     font: 14px/1.45 system-ui, "Segoe UI", sans-serif; }
-  #app { display: flex; height: 100%; }
-  #panel { width: 390px; flex: none; background: var(--panel); border-right: 1px solid var(--line); padding: 16px 16px 24px; overflow-y: auto; }
-  #view { position: relative; flex: 1; min-width: 0; }
+  #app { display: grid; grid-template-rows: 56px 1fr; height: 100vh; height: 100dvh; }
+  #top { display: flex; align-items: center; gap: 18px; padding: 0 14px; background: var(--panel);
+    border-bottom: 1px solid var(--line); min-width: 0; }
+  .brand { display: flex; align-items: center; gap: 10px; flex: none; }
+  .logo { width: 32px; height: 32px; border-radius: 9px; background: #1f3a2e; display: grid; place-items: center; }
+  .brand b { display: block; font-size: 15px; line-height: 1.1; }
+  .brand small { color: var(--muted); font-size: 11.5px; }
+  #tabs { display: flex; gap: 4px; background: var(--bg); border: 1px solid var(--line); border-radius: 11px; padding: 3px; margin: 0 auto; }
+  #tabs button { display: flex; align-items: center; gap: 7px; border: 0; background: transparent; color: var(--muted);
+    padding: 7px 13px; border-radius: 8px; font-weight: 500; }
+  #tabs button:hover { color: var(--text); }
+  #tabs button.on { background: var(--panel-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--blue); }
+  #tabs svg { width: 17px; height: 17px; flex: none; }
+  .ghost { color: #8fb6ff; text-decoration: none; font-size: 13px; flex: none; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; }
+  .ghost:hover { border-color: #4a5266; }
+  #main { display: flex; min-height: 0; }
+  #panel { width: 370px; flex: none; background: var(--panel); border-right: 1px solid var(--line);
+    display: flex; flex-direction: column; min-height: 0; }
+  #panes { flex: 1; min-height: 0; overflow-y: auto; padding: 16px 16px 12px; }
+  .pane { display: none; } .pane.on { display: block; }
+  #foot { flex: none; border-top: 1px solid var(--line); padding: 9px 16px 11px; background: #171a21; }
+  #foot .line { display: flex; gap: 6px; align-items: center; font-size: 12.5px; color: var(--muted); }
+  #foot .line b { color: var(--text); font-variant-numeric: tabular-nums; }
+  #foot .line button { margin-left: auto; padding: 3px 9px; }
+  #view { position: relative; flex: 1; min-width: 0; overflow: hidden; }
   #view canvas { display: block; touch-action: none; }
-  h1 { font-size: 19px; margin: 0; }
-  .sub { color: var(--muted); margin: 2px 0 10px; font-size: 12.5px; }
-  details.note { font-size: 12.5px; color: var(--muted); background: var(--panel-2); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; }
-  details.note summary { cursor: pointer; color: var(--text); }
+  .seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; }
+  h2 { font-size: 17px; margin: 0; }
+  .lead { color: var(--muted); margin: 2px 0 12px; font-size: 12.5px; }
+  .hint { color: var(--muted); font-size: 12.5px; margin: 0; }
+  code { font-family: Consolas, monospace; font-size: 12.5px; color: #c9d4ff; }
+  .note { font-size: 13px; color: var(--muted); line-height: 1.55; }
+  .note b { color: var(--text); }
+  .note li { margin: 4px 0; }
   button { font: inherit; color: var(--text); background: var(--panel-2); border: 1px solid var(--line); border-radius: 7px; padding: 5px 9px; cursor: pointer; }
   button:hover { border-color: #4a5266; }
   button.on { background: #2d3a55; border-color: var(--blue); }
@@ -42,23 +68,42 @@
   .badge { display: inline-block; padding: 0 7px; border-radius: 99px; font-size: 12px; font-weight: 600; }
   .yes { background: rgba(63,179,127,.18); color: var(--green); }
   .no { background: rgba(224,86,91,.18); color: var(--red); }
+  #story:empty { display: none; }
   #story { font-size: 13.5px; line-height: 1.5; background: #1f2a3d; border: 1px solid #2f4466; border-radius: 9px; padding: 9px 11px; margin-top: 10px; }
   #curve { width: 100%; height: 74px; display: block; margin-top: 6px; }
-  #msg { margin-top: 8px; font-size: 13px; min-height: 1.3em; }
+  #msg { font-size: 12.5px; margin-bottom: 5px; }
+  #msg:empty, #hud:empty { display: none; }
   #msg.err { color: var(--red); } #msg.ok { color: var(--green); }
   #hud { position: absolute; left: 14px; top: 12px; background: rgba(18,20,26,.8); border: 1px solid var(--line);
-    border-radius: 8px; padding: 6px 10px; font-size: 13px; pointer-events: none; }
+    border-radius: 8px; padding: 6px 10px; font-size: 13px; pointer-events: none; z-index: 2; }
   #legend { position: absolute; left: 14px; bottom: 14px; background: rgba(18,20,26,.8); border: 1px solid var(--line);
-    border-radius: 8px; padding: 7px 10px; font-size: 12px; pointer-events: none; }
+    border-radius: 8px; padding: 7px 10px; font-size: 12px; pointer-events: none; z-index: 2; }
   #legend .bar { width: 180px; height: 9px; border-radius: 99px; margin: 4px 0 2px; background: linear-gradient(90deg, #c9534f, #cdb894, #2fa36b); }
   #legend .ends { display: flex; justify-content: space-between; color: var(--muted); }
   label.check { font-size: 13px; display: flex; gap: 6px; align-items: center; margin-top: 8px; cursor: pointer; }
   a { color: #8fb6ff; }
-  @media (max-width: 760px) { #app { flex-direction: column; } #panel { width: 100%; max-height: 50%; border-right: 0; border-bottom: 1px solid var(--line); } }
+  @media (max-width: 760px) {
+    #app { grid-template-rows: 50px 1fr 62px; }
+    #top { justify-content: space-between; }
+    #tabs { position: fixed; left: 0; right: 0; bottom: 0; height: 62px; margin: 0; border-radius: 0; border: 0;
+      border-top: 1px solid var(--line); background: var(--panel); padding: 4px 4px calc(4px + env(safe-area-inset-bottom));
+      display: grid; grid-template-columns: repeat(5, 1fr); z-index: 10; }
+    #tabs button { flex-direction: column; gap: 2px; font-size: 11px; padding: 5px 2px; }
+    #tabs button.on { box-shadow: none; color: #8fb6ff; background: transparent; }
+    #tabs svg { width: 21px; height: 21px; }
+    #main { flex-direction: column; grid-row: 2; }
+    #view { flex: 1 1 52%; min-height: 0; }
+    #panel { order: 2; width: 100%; flex: 0 1 48%; border-right: 0; border-top: 1px solid var(--line); }
+    #panes { padding: 12px 16px; }
+    .lead, .brand small, #legend { display: none; }
+    .ghost { font-size: 12px; padding: 5px 8px; }
+    .qhead { gap: 4px 12px; font-size: 12px; }
+  }
 </style>
 <script src="data.js"></script>
 <script src="scene.js"></script>
 <script src="sandbox-core.js"></script>
+<script src="qgrid.js"></script>
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -68,56 +113,103 @@
 </head>
 <body>
 <div id="app">
-  <aside id="panel">
-    <h1>Map sandbox</h1>
-    <p class="sub">Topic 7 · how a robot learns its way around · <a href="index.html">evaluated view</a></p>
-    <details class="note"><summary>How to use it</summary>
-      Drag a <b>table</b> to another free cell, or drag a <b>guest</b> from the tray on the right onto the floor (drag it back to remove it). Moves that would leave a spot unreachable are refused. Click a free cell to choose where the robot starts. Everything happens only in this page: <code>data/map.txt</code> and <code>q_table.npy</code> do not change, and the learning runs here in JavaScript, not in the evaluated Python code.
-    </details>
-
-    <div class="group"><div class="label">Mode</div>
-      <div class="row"><button data-mode="watch">Watch it learn</button><button data-mode="learned">Already learned</button></div>
+  <header id="top">
+    <div class="brand">
+      <span class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7fd6a8" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><path d="M14 6.5h4a2 2 0 0 1 2 2V11M10 17.5H6a2 2 0 0 1-2-2V13"/></svg></span>
+      <div><b>Map sandbox</b><small>How a robot learns its way around</small></div>
     </div>
-    <div class="group" id="playGroup"><div class="row">
-      <button id="play">⏸ Pause</button>
-      <span class="label" style="margin:0 0 0 6px">speed</span>
-      <button data-speed="1">1×</button><button data-speed="3">3×</button><button data-speed="10">10×</button>
-    </div></div>
+    <nav id="tabs">
+      <button data-tab="learn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4l14 8-14 8z"/></svg>Learn</button>
+      <button data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>Settings</button>
+      <button data-tab="robots"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01"/></svg>Results</button>
+      <button data-tab="q"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16M15 4v16"/></svg>Q table</button>
+      <button data-tab="help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17h.01"/></svg>Help</button>
+    </nav>
+    <a class="ghost" href="index.html">Evaluated view ↗</a>
+  </header>
+  <div id="main">
+    <aside id="panel">
+      <div id="panes">
+        <section class="pane" data-pane="learn">
+          <h2>Learn</h2><p class="lead">Drag tables or guests in the 3D view, then watch the robot learn the new map.</p>
+          <div class="group"><div class="label">Mode</div>
+            <div class="seg"><button data-mode="watch">Watch it learn</button><button data-mode="learned">Already learned</button></div>
+          </div>
+          <div class="group" id="playGroup"><div class="row">
+            <button id="play">⏸ Pause</button>
+            <span class="label" style="margin:0 0 0 6px">speed</span>
+            <button data-speed="1">1×</button><button data-speed="3">3×</button><button data-speed="10">10×</button>
+          </div></div>
+          <div class="group"><div class="label">Destination</div><div class="seg" id="dests"></div></div>
+          <div class="row"><button id="replay">Replay robots</button><button id="reset">Reset map</button></div>
+          <label class="check"><input type="checkbox" id="showKnow" checked> Show what the table knows (colours and arrows)</label>
+          <div id="story"></div>
+        </section>
 
-    <div class="group"><div class="label">Learning settings</div>
-      <div class="slider"><span>α</span><input id="alpha" type="range" min="0.05" max="1" step="0.05"><b id="alphaV"></b></div>
-      <div class="help" id="alphaHelp"></div>
-      <div class="slider"><span>γ</span><input id="gamma" type="range" min="0.5" max="0.99" step="0.01"><b id="gammaV"></b></div>
-      <div class="help" id="gammaHelp"></div>
-      <div class="slider"><span>max ep.</span><input id="cap" type="range" min="500" max="5000" step="100"><b id="capV"></b></div>
-      <div class="help">The most practice games the robot may play before we stop it.</div>
-    </div>
+        <section class="pane" data-pane="settings">
+          <h2>Settings</h2><p class="lead">Changing a value makes the robot start learning from zero.</p>
+          <div class="group"><div class="label">Learning settings</div>
+            <div class="slider"><span>α</span><input id="alpha" type="range" min="0.05" max="1" step="0.05"><b id="alphaV"></b></div>
+            <div class="help" id="alphaHelp"></div>
+            <div class="slider"><span>γ</span><input id="gamma" type="range" min="0.5" max="0.99" step="0.01"><b id="gammaV"></b></div>
+            <div class="help" id="gammaHelp"></div>
+            <div class="slider"><span>max ep.</span><input id="cap" type="range" min="500" max="5000" step="100"><b id="capV"></b></div>
+            <div class="help">The most practice games the robot may play before we stop it.</div>
+          </div>
+          <div class="formula" style="margin-top:14px">Q(s,a) ← Q(s,a) + α·[r + γ·max Q(s′,·) − Q(s,a)]</div>
+          <p class="hint" style="margin-top:8px">α weighs the new experience against what it already knew; γ weighs the future reward max Q(s′,·).</p>
+        </section>
 
-    <div class="group"><div class="label">Destination</div><div class="row" id="dests"></div></div>
-    <div class="row"><button id="replay">Replay robots</button><button id="reset">Reset map</button></div>
-    <label class="check"><input type="checkbox" id="showKnow" checked> Show what the table knows (colours and arrows)</label>
-    <div id="msg"></div>
+        <section class="pane" data-pane="robots">
+          <h2>Results</h2><p class="lead">How the learning went and how the three robots did from the chosen start.</p>
+          <div class="card" style="margin-top:0">
+            <h3>Learning</h3>
+            <div class="stats">
+              <div class="stat"><div class="v" id="eps">–</div><div class="k">practice games (episodes)</div></div>
+              <div class="stat"><div class="v" id="score">–</div><div class="k">routes it gets right</div></div>
+              <div class="stat"><div class="v" id="steps">–</div><div class="k">random moves tried</div></div>
+              <div class="stat"><div class="v" id="ms">–</div><div class="k">time spent learning</div></div>
+            </div>
+            <svg id="curve" viewBox="0 0 300 74" preserveAspectRatio="none"></svg>
+            <div style="font-size:11.5px;color:var(--muted)">% of routes right after each block of 100 games · dashed line: 95 %</div>
+          </div>
+          <div id="cards"></div>
+        </section>
 
-    <div id="story"></div>
+        <section class="pane" data-pane="q">
+          <h2>Q table</h2><p class="lead">The numbers behind every decision: four values per cell, one per action. In "Watch it learn" they fill in live.</p>
+          <div class="group"><div class="label">Table</div>
+            <div class="seg"><button data-qwhich="new">Retrained on this map</button><button data-qwhich="orig">Original (q_table.npy)</button></div></div>
+          <div class="group"><div class="label">Destination</div><div class="seg" id="qdests"></div></div>
+          <div id="qinfo" style="margin-top:12px"></div>
+          <p class="hint" style="margin-top:10px">Click any cell of the grid to see its row. Moving a table changes the map, but the original table keeps the values it learned for the old one.</p>
+        </section>
 
-    <div class="card">
-      <h3>Learning</h3>
-      <div class="stats">
-        <div class="stat"><div class="v" id="eps">–</div><div class="k">practice games (episodes)</div></div>
-        <div class="stat"><div class="v" id="score">–</div><div class="k">routes it gets right</div></div>
-        <div class="stat"><div class="v" id="steps">–</div><div class="k">random moves tried</div></div>
-        <div class="stat"><div class="v" id="ms">–</div><div class="k">time spent learning</div></div>
+        <section class="pane" data-pane="help">
+          <h2>How to use it</h2>
+          <ul class="note" style="padding-left:18px;margin:10px 0">
+            <li>Drag a <b>table</b> to another free cell.</li>
+            <li>Drag a <b>guest</b> from the tray on the right onto the floor; drag it back to remove it.</li>
+            <li>Moves that would leave a spot unreachable are refused.</li>
+            <li>Click a free cell to choose where the robot starts.</li>
+            <li>Three robots run from that start: <b style="color:var(--red)">original</b> (q_table.npy), <b style="color:#6ea8ff">retrained</b> on this map and <b>BFS</b>, the shortest route.</li>
+          </ul>
+          <p class="note">If the map changes, Q-learning must retrain; search recomputes at once. Everything happens only in this page: <code>data/map.txt</code> and <code>q_table.npy</code> do not change, and the learning runs here in JavaScript, not in the evaluated Python code.</p>
+          <p class="note">Keys 1-5 switch tabs.</p>
+        </section>
       </div>
-      <svg id="curve" viewBox="0 0 300 74" preserveAspectRatio="none"></svg>
-      <div class="hint" style="font-size:11.5px;color:var(--muted)">% of routes right after each block of 100 games · dashed line: 95 %</div>
-    </div>
-    <div id="cards"></div>
-  </aside>
-  <main id="view"><div id="hud"></div>
-    <div id="legend">What the table knows about each cell
-      <div class="bar"></div><div class="ends"><span>bad (fryers)</span><span>nothing yet</span><span>leads to goal</span></div>
-    </div>
-  </main>
+      <footer id="foot">
+        <div id="msg"></div>
+        <div class="line"><span>games <b id="fEps">–</b></span><span>·</span><span>right <b id="fScore">–</b></span><span>·</span><span id="fState">–</span><button id="fPlay">⏸</button></div>
+      </footer>
+    </aside>
+    <main id="view"><div id="hud"></div>
+      <div id="legend">What the table knows about each cell
+        <div class="bar"></div><div class="ends"><span>bad (fryers)</span><span>nothing yet</span><span>leads to goal</span></div>
+      </div>
+      <div id="qview" class="qview"><div id="qhead" class="qhead"></div><div id="qgrid" class="qgrid"></div></div>
+    </main>
+  </div>
 </div>
 
 <script type="module">
@@ -191,7 +283,7 @@ hover.rotation.x = -Math.PI / 2; hover.visible = false; scene.add(hover);
 
 // ---------- state ----------
 const S = { grid: ORIGINAL, dest: "T", start: [0, 0], table: null, run: null, last: null, runners: [],
-            mode: "watch", playing: true, speed: 3, alpha: 0.5, gamma: 0.9, cap: 3000, showKnow: true, timer: null };
+            tab: "learn", qWhich: "new", qCell: [0, 0], mode: "watch", playing: true, speed: 3, alpha: 0.5, gamma: 0.9, cap: 3000, showKnow: true, timer: null };
 const $ = id => document.getElementById(id);
 const say = (text, cls = "") => { $("msg").textContent = text; $("msg").className = cls; };
 const badge = ok => `<span class="badge ${ok ? "yes" : "no"}">${ok ? "yes" : "no"}</span>`;
@@ -259,7 +351,46 @@ function renderPanel() {
   $("gamma").value = S.gamma; $("gammaV").textContent = S.gamma.toFixed(2); $("gammaHelp").textContent = gammaHelp(S.gamma);
   $("cap").value = S.cap; $("capV").textContent = S.cap;
   $("legend").style.display = S.showKnow ? "" : "none";
+  $("fEps").textContent = L ? L.episodes.toLocaleString("en") : "–";
+  $("fScore").textContent = L ? `${L.good}/${L.total}` : "–";
+  $("fState").textContent = S.run ? (S.mode === "watch" && !S.playing ? "paused" : "learning…") : L ? "done" : "–";
+  $("fPlay").style.display = S.run && S.mode === "watch" ? "" : "none";
+  $("fPlay").textContent = S.playing ? "⏸" : "▶";
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.tab === S.tab));
+  document.querySelectorAll(".pane").forEach(p => p.classList.toggle("on", p.dataset.pane === S.tab));
+  $("qview").classList.toggle("show", S.tab === "q");
+  if (S.tab === "q") drawQ();
 }
+
+// ---------- Q table tab (viz/qgrid.js) ----------
+const QG = window.WaiterQGrid;
+function qOf(r, c) {
+  const t = S.qWhich === "orig" ? ORIG_TABLE : S.table;
+  if (!t) return [0, 0, 0, 0];
+  const s = S.grid.encode(r, c, S.grid.destinations.indexOf(S.dest));
+  return Array.from(t.q.subarray(s * t.nA, s * t.nA + t.nA));
+}
+function drawQ() {
+  document.querySelectorAll("[data-qwhich]").forEach(b => b.classList.toggle("on", b.dataset.qwhich === S.qWhich));
+  $("qdests").innerHTML = $("dests").innerHTML;
+  const { lo, hi } = QG.draw($("qgrid"), { rows: S.grid.rows, dest: S.dest, qOf, sel: S.qCell });
+  const L = S.last;
+  const which = S.qWhich === "orig" ? "<b>original table</b> (q_table.npy, original map)"
+    : `<b>retrained table</b> · α ${S.alpha.toFixed(2)} · γ ${S.gamma.toFixed(2)}${L ? ` · after ${L.episodes.toLocaleString("en")} games` : ""}`;
+  $("qhead").innerHTML = `<span>${which}</span><span>heading to <b>${S.dest} · ${NAMES[S.dest]}</b></span>${QG.scale(lo, hi)}`;
+  QG.layout($("qview"), $("qhead"), $("qgrid"), ROWS, COLS);
+  drawQInfo();
+}
+function drawQInfo() {
+  $("qinfo").innerHTML = QG.detail({ rows: S.grid.rows, dest: S.dest, destIndex: S.grid.destinations.indexOf(S.dest), qOf, cell: S.qCell, placeName: l => NAMES[l] });
+}
+$("qgrid").addEventListener("click", e => {
+  const el = e.target.closest(".qc"); if (!el) return;
+  S.qCell = [Number(el.dataset.r), Number(el.dataset.c)];
+  $("qgrid").querySelectorAll(".qc.sel").forEach(q => q.classList.remove("sel")); el.classList.add("sel");
+  drawQInfo();
+});
+addEventListener("resize", () => { if (S.tab === "q") QG.layout($("qview"), $("qhead"), $("qgrid"), ROWS, COLS); });
 
 // ---------- what the table knows: coloured floor and arrows ----------
 const BAD = new THREE.Color(0xc9534f), GOOD = new THREE.Color(0x2fa36b);
@@ -434,6 +565,8 @@ renderer.domElement.addEventListener("pointerup", e => {
 $("panel").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
   if (b.dataset.mode) { S.mode = b.dataset.mode; retrain(); }
+  if (b.dataset.qwhich) { S.qWhich = b.dataset.qwhich; renderPanel(); }
+  if (b.id === "fPlay") { S.playing = !S.playing; renderPanel(); if (S.playing) step(); else stopTimer(); }
   if (b.dataset.speed) { S.speed = Number(b.dataset.speed); renderPanel(); }
   if (b.dataset.dest) { S.dest = b.dataset.dest; showKnowledge(); if (S.run) testRobot(); else showRoutes(); renderPanel(); }
   if (b.id === "play") { S.playing = !S.playing; renderPanel(); if (S.playing) step(); else stopTimer(); }
@@ -444,6 +577,11 @@ for (const [id, key, parse] of [["alpha", "alpha", parseFloat], ["gamma", "gamma
   $(id).addEventListener("input", e => { S[key] = parse(e.target.value); renderPanel(); });
   $(id).addEventListener("change", () => { say(`New setting: the robot starts learning from zero.`, "ok"); retrain(); });
 }
+$("tabs").addEventListener("click", e => { const t = e.target.closest("button")?.dataset.tab; if (t) { S.tab = t; renderPanel(); } });
+addEventListener("keydown", e => {  // 1-5 switch tabs
+  const t = ["learn", "settings", "robots", "q", "help"][Number(e.key) - 1];
+  if (t && !e.ctrlKey && !e.metaKey && !e.altKey && e.target.tagName !== "INPUT") { S.tab = t; renderPanel(); }
+});
 $("showKnow").addEventListener("change", e => { S.showKnow = e.target.checked; showKnowledge(); renderPanel(); });
 
 // ---------- loop ----------
@@ -458,6 +596,7 @@ renderer.setAnimationLoop(() => {
   fryerOils.forEach((o, i) => { o.material.emissiveIntensity = flick + 0.1 * Math.sin(i + performance.now() / 90); });
   fryerLight.intensity = 1.8 + 0.6 * flick;
   pieces.forEach(p => { if (p.kind === "person" && p !== drag) p.obj.rotation.y = 0.3 * Math.sin(performance.now() / 900 + p.slot); });
+  if (S.tab === "q") return;  // the Q grid covers the 3D view
   controls.update();
   renderer.render(scene, camera);
 });
@@ -465,6 +604,9 @@ renderer.setAnimationLoop(() => {
 // URL hash for quick demos: #learned, #move-table (table (0, 5) -> (2, 5), bar to kitchen).
 buildPieces();
 if (location.hash.includes("learned") || location.hash.includes("move-table")) S.mode = "learned";
+if (location.hash.includes("move-table")) S.tab = "robots";
+const hashTab = location.hash.slice(1).split("+").find(t => ["learn", "settings", "robots", "q", "help"].includes(t));
+if (hashTab) S.tab = hashTab;  // e.g. sandbox.html#q or #move-table+q
 if (location.hash.includes("move-table")) {
   const p = pieces.find(q => q.r === 0 && q.c === 5);
   S.dest = "K"; S.start = [0, 8];

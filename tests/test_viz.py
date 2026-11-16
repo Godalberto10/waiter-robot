@@ -35,3 +35,9 @@ def test_export_does_not_change_the_table(data: dict) -> None:
     export_viz.build()
     assert np.array_equal(np.load("q_table.npy"), before)
     assert np.array_equal(tools.QTABLE.q, before)
+
+
+def test_q_values_of_both_tables(data: dict) -> None:
+    for alpha in ("0.5", "0.1"):
+        assert np.array(data["tables"][alpha]["q"]).shape == (162, 4)
+    assert np.allclose(data["tables"]["0.5"]["q"], np.load("q_table.npy"), atol=1e-3)

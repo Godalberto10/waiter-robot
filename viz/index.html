@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Waiter robot 3D</title>
 <style>
   :root {
@@ -11,24 +11,43 @@
     --green: #3fb37f; --red: #e0565b;
   }
   * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
-    font: 14px/1.45 system-ui, "Segoe UI", "Leelawadee UI", sans-serif; }
-  #app { display: flex; height: 100%; }
-  #panel { width: 360px; flex: none; background: var(--panel); border-right: 1px solid var(--line);
-    padding: 18px 18px 24px; overflow-y: auto; }
-  #view { position: relative; flex: 1; min-width: 0; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--text);
+    font: 14px/1.45 system-ui, "Segoe UI", "Leelawadee UI", sans-serif; -webkit-tap-highlight-color: transparent; }
+  #app { display: grid; grid-template-rows: 56px 1fr; height: 100vh; height: 100dvh; }
+
+  /* top bar */
+  #top { display: flex; align-items: center; gap: 18px; padding: 0 14px; background: var(--panel);
+    border-bottom: 1px solid var(--line); min-width: 0; }
+  .brand { display: flex; align-items: center; gap: 10px; flex: none; }
+  .logo { width: 32px; height: 32px; border-radius: 9px; background: #2d3a55; display: grid; place-items: center; }
+  .brand b { display: block; font-size: 15px; line-height: 1.1; }
+  .brand small { color: var(--muted); font-size: 11.5px; }
+  #tabs { display: flex; gap: 4px; background: var(--bg); border: 1px solid var(--line); border-radius: 11px; padding: 3px; margin: 0 auto; }
+  #tabs button { display: flex; align-items: center; gap: 7px; border: 0; background: transparent; color: var(--muted);
+    padding: 7px 13px; border-radius: 8px; font-weight: 500; }
+  #tabs button:hover { color: var(--text); }
+  #tabs button.on { background: var(--panel-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--blue); }
+  #tabs svg { width: 17px; height: 17px; flex: none; }
+  .ghost { color: #8fb6ff; text-decoration: none; font-size: 13px; flex: none; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; }
+  .ghost:hover { border-color: #4a5266; }
+
+  /* body */
+  #main { display: flex; min-height: 0; }
+  #side { width: 350px; flex: none; background: var(--panel); border-right: 1px solid var(--line);
+    padding: 16px 16px 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+  #view { position: relative; flex: 1; min-width: 0; overflow: hidden; }
   #view canvas { display: block; }
-  h1 { font-size: 19px; margin: 0; }
-  .sub { color: var(--muted); margin: 2px 0 14px; font-size: 12.5px; }
-  #tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 14px; }
+  h2 { font-size: 17px; margin: 0; }
+  .sub { color: var(--muted); margin: 2px 0 0; font-size: 12.5px; }
   button { font: inherit; color: var(--text); background: var(--panel-2); border: 1px solid var(--line);
     border-radius: 7px; padding: 6px 8px; cursor: pointer; }
   button:hover { border-color: #4a5266; }
   button.on { background: #2d3a55; border-color: var(--blue); }
-  .group { margin: 10px 0; }
+  .group + .group { margin-top: 10px; }
   .label { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 5px; }
   .row { display: flex; gap: 5px; flex-wrap: wrap; }
-  .card { background: var(--panel-2); border: 1px solid var(--line); border-radius: 9px; padding: 11px 12px; margin-top: 12px; }
+  .seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; }
+  .card { background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; }
   .card p { margin: 4px 0; }
   .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; }
   .kv span:nth-child(odd) { color: var(--muted); }
@@ -36,25 +55,41 @@
   .yes { background: rgba(63,179,127,.18); color: var(--green); }
   .no { background: rgba(224,86,91,.18); color: var(--red); }
   .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
-  .hint { color: var(--muted); font-size: 12.5px; }
-  .answer { white-space: pre-wrap; font-size: 13px; background: #161920; border-radius: 6px; padding: 8px; margin-top: 6px; max-height: 190px; overflow: auto; }
+  .hint { color: var(--muted); font-size: 12.5px; margin: 0; }
+  .answer { white-space: pre-wrap; font-size: 13px; background: #161920; border-radius: 6px; padding: 8px; margin-top: 6px; max-height: 170px; overflow: auto; }
   code { font-family: Consolas, monospace; font-size: 12.5px; color: #c9d4ff; }
   #hud { position: absolute; left: 14px; top: 12px; background: rgba(18,20,26,.78); border: 1px solid var(--line);
-    border-radius: 8px; padding: 6px 10px; font-size: 13px; pointer-events: none; }
+    border-radius: 8px; padding: 6px 10px; font-size: 13px; pointer-events: none; z-index: 2; }
   #tip { position: absolute; pointer-events: none; background: rgba(18,20,26,.9); border: 1px solid var(--line);
-    border-radius: 6px; padding: 3px 7px; font-size: 12px; display: none; }
+    border-radius: 6px; padding: 3px 7px; font-size: 12px; display: none; z-index: 2; }
   #bubble { position: absolute; max-width: 260px; background: #f4f1ea; color: #1b1b1b; border-radius: 10px;
     padding: 7px 10px; font-size: 12.5px; transform: translate(-50%, -100%); pointer-events: none; display: none;
-    box-shadow: 0 4px 16px rgba(0,0,0,.35); }
+    box-shadow: 0 4px 16px rgba(0,0,0,.35); z-index: 2; }
   #bubble::after { content: ""; position: absolute; left: 50%; bottom: -7px; margin-left: -7px;
     border: 7px solid transparent; border-top-color: #f4f1ea; border-bottom: 0; }
+
   @media (max-width: 760px) {
-    #app { flex-direction: column; }
-    #panel { width: 100%; max-height: 46%; border-right: 0; border-bottom: 1px solid var(--line); }
+    #app { grid-template-rows: 50px 1fr 62px; }
+    #top { justify-content: space-between; }
+    #tabs { grid-row: 3; position: fixed; left: 0; right: 0; bottom: 0; height: 62px; margin: 0; border-radius: 0; border: 0;
+      border-top: 1px solid var(--line); background: var(--panel); padding: 4px 4px calc(4px + env(safe-area-inset-bottom));
+      display: grid; grid-template-columns: repeat(5, 1fr); z-index: 10; }
+    #tabs button { flex-direction: column; gap: 2px; font-size: 11px; padding: 5px 2px; }
+    #tabs button.on { box-shadow: none; color: #8fb6ff; background: transparent; }
+    #tabs svg { width: 21px; height: 21px; }
+    #main { flex-direction: column; grid-row: 2; }
+    #view { flex: 1 1 55%; min-height: 0; }
+    #side { order: 2; width: 100%; flex: 0 1 45%; min-height: 0; border-right: 0; border-top: 1px solid var(--line); padding: 12px 16px; gap: 10px; }
+    #side .sub { display: none; }
+    .brand small { display: none; }
+    .ghost { font-size: 12px; padding: 5px 8px; }
+    .seg button { padding: 6px 4px; font-size: 13px; }
+    .qhead { gap: 4px 12px; font-size: 12px; }
   }
 </style>
 <script src="data.js"></script>
 <script src="scene.js"></script>
+<script src="qgrid.js"></script>
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -64,23 +99,36 @@
 </head>
 <body>
 <div id="app">
-  <aside id="panel">
-    <h1>Waiter robot</h1>
-    <p class="sub">Topic 7 · Q table (Q-learning) + LLM agent · data from <code>uv run export-viz</code> · <a href="sandbox.html" style="color:#8fb6ff">map sandbox</a></p>
+  <header id="top">
+    <div class="brand">
+      <span class="logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8fb6ff" stroke-width="2" stroke-linecap="round"><rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M3 13v3M21 13v3"/></svg></span>
+      <div><b>Waiter robot</b><small>Q-learning + LLM agent</small></div>
+    </div>
     <nav id="tabs">
-      <button data-mode="route">Route</button>
-      <button data-mode="policy">Policy</button>
-      <button data-mode="agent">Agent</button>
-      <button data-mode="compare">Compare α</button>
+      <button data-mode="route"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h6a3 3 0 0 0 0-6h-4a3 3 0 0 1 0-6h6"/></svg>Route</button>
+      <button data-mode="policy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h12M13 8l4 4-4 4"/><path d="M5 5h4M5 19h4"/></svg>Policy</button>
+      <button data-mode="q"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16M15 4v16"/></svg>Q table</button>
+      <button data-mode="agent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 10h8"/></svg>Agent</button>
+      <button data-mode="compare"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4v16M16 4v16M4 8h8M12 16h8"/></svg>Compare α</button>
     </nav>
-    <section id="controls"></section>
-    <section id="info"></section>
-  </aside>
-  <main id="view">
-    <div id="hud"></div>
-    <div id="tip"></div>
-    <div id="bubble"></div>
-  </main>
+    <a class="ghost" href="sandbox.html">Map sandbox ↗</a>
+  </header>
+  <div id="main">
+    <aside id="side">
+      <div><h2 id="title"></h2><p class="sub" id="lead"></p></div>
+      <section id="controls"></section>
+      <section id="info"></section>
+    </aside>
+    <main id="view">
+      <div id="hud"></div>
+      <div id="tip"></div>
+      <div id="bubble"></div>
+      <div id="qview" class="qview">
+        <div id="qhead" class="qhead"></div>
+        <div id="qgrid" class="qgrid"></div>
+      </div>
+    </main>
+  </div>
 </div>
 
 <script type="module">
@@ -90,13 +138,14 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 const D = window.VIZ_DATA;
 const ROWS = D.map.length, COLS = D.map[0].length;
 const PLACES = Object.fromEntries(D.places.map(p => [p.letter, p]));
-const LETTERS = D.places.map(p => p.letter);
+const LETTERS = D.places.map(p => p.letter);  // alphabetical: destination index B=0, K=1, T=2
 const ARROW_DIRS = [[0, -1], [1, 0], [0, 1], [-1, 0]];  // action -> (dx, dz): up, right, down, left
 const TABLE_COLOR = { "0.5": 0x2a78d6, "0.1": 0xeb6834 };
 const W = window.WaiterScene(THREE, OrbitControls, D.map);  // shared restaurant (viz/scene.js)
 const { x, z } = W;
 const key = (r, c) => `${r},${c}`;
 const cellAt = (r, c) => D.map[r][c];
+const stateOf = (r, c, dest) => LETTERS.indexOf(dest) * ROWS * COLS + r * COLS + c;
 
 // ---------- scene ----------
 const view = document.getElementById("view");
@@ -141,15 +190,23 @@ const hover = new THREE.Mesh(new THREE.RingGeometry(0.36, 0.46, 40), new THREE.M
 hover.rotation.x = -Math.PI / 2; hover.visible = false; scene.add(hover);
 
 // ---------- state and UI ----------
-const S = { mode: "route", dest: "T", alpha: "0.5", start: [0, 0], cmpDest: "K", cmpStart: [0, 8], caseN: 1, runners: [], bubble: null };
+const MODES = {
+  route: ["Route", "Pick a destination and click a floor cell: the robot follows the Q table from there."],
+  policy: ["Policy", "One arrow per free cell: the best action towards the chosen destination."],
+  q: ["Q table", "The numbers behind every decision: four values per cell, one per action. The robot takes the highest."],
+  agent: ["Agent", "The four requests run with the real model (qwen2.5:14b, final attempt)."],
+  compare: ["Compare α", "Same start, two tables: α = 0.5 (q_table.npy) against α = 0.1."],
+};
+const S = { mode: "route", dest: "T", alpha: "0.5", start: [0, 0], cmpDest: "K", cmpStart: [0, 8], caseN: 1, qCell: [0, 0], runners: [], bubble: null };
 const $ = id => document.getElementById(id);
 const controlsEl = $("controls"), infoEl = $("info"), hud = $("hud"), tip = $("tip"), bubble = $("bubble");
+const qview = $("qview"), qgrid = $("qgrid"), qhead = $("qhead");
 
-function btns(items, current, attr) {
-  return `<div class="row">${items.map(([v, txt]) => `<button data-${attr}="${v}" class="${String(v) === String(current) ? "on" : ""}">${txt}</button>`).join("")}</div>`;
+function btns(items, current, attr, cls = "row") {
+  return `<div class="${cls}">${items.map(([v, txt]) => `<button data-${attr}="${v}" class="${String(v) === String(current) ? "on" : ""}">${txt}</button>`).join("")}</div>`;
 }
-const destButtons = cur => btns(LETTERS.map(l => [l, `${l} · ${PLACES[l].name}`]), cur, "dest");
-const alphaButtons = cur => btns([["0.5", "α = 0.5 (q_table.npy)"], ["0.1", "α = 0.1"]], cur, "alpha");
+const destButtons = cur => btns(LETTERS.map(l => [l, `${l} · ${PLACES[l].name}`]), cur, "dest", "seg");
+const alphaButtons = cur => btns([["0.5", "α = 0.5 · q_table.npy"], ["0.1", "α = 0.1"]], cur, "alpha", "seg");
 const badge = ok => `<span class="badge ${ok ? "yes" : "no"}">${ok ? "yes" : "no"}</span>`;
 const esc = s => String(s).replace(/[&<>]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[ch]);
 
@@ -175,17 +232,21 @@ function setRunners(list) { S.runners = list; robotA.visible = list.some(r => r.
 
 function render() {
   document.querySelectorAll("#tabs button").forEach(b => b.classList.toggle("on", b.dataset.mode === S.mode));
+  [$("title").textContent, $("lead").textContent] = MODES[S.mode];
+  if (location.hash.slice(1) !== S.mode) history.replaceState(null, "", `#${S.mode}`);
   clearOverlay(); S.bubble = null; bubble.style.display = "none";
+  qview.classList.toggle("show", S.mode === "q");
+  hud.style.display = S.mode === "q" ? "none" : "";
   if (S.mode === "route") renderRoute();
   else if (S.mode === "policy") renderPolicy();
+  else if (S.mode === "q") renderQ();
   else if (S.mode === "agent") renderAgent();
   else renderCompare();
 }
 
 function renderRoute(err) {
   controlsEl.innerHTML = `<div class="group"><div class="label">Destination</div>${destButtons(S.dest)}</div>
-    <div class="group"><div class="label">Q table</div>${alphaButtons(S.alpha)}</div>
-    <p class="hint">Click a free floor cell to set the robot's start. Same result as <code>run_policy(row, col, "${S.dest}")</code>.</p>`;
+    <div class="group"><div class="label">Q table</div>${alphaButtons(S.alpha)}</div>`;
   const [r, c] = S.start;
   const bad = invalidStart(r, c, S.dest);
   if (bad || err) {
@@ -197,27 +258,60 @@ function renderRoute(err) {
   trail(route.path, TABLE_COLOR[S.alpha]); marker(goal.row, goal.col, 0xffffff);
   setRunners([new Runner(robotA, route.path)]);
   infoEl.innerHTML = `<div class="card"><p><code>run_policy(${r}, ${c}, "${S.dest}")</code></p>${routeCard(route, S.dest, S.start, S.alpha)}
-    <p style="margin-top:10px"><button id="replay">Replay</button></p></div>`;
+    <p style="margin-top:10px;display:flex;gap:6px"><button id="replay">Replay</button><button id="seeQ">Q values of this cell</button></p></div>`;
   $("replay").onclick = () => renderRoute();
+  $("seeQ").onclick = () => { S.qCell = [r, c]; S.mode = "q"; render(); };
 }
 
 function renderPolicy() {
   controlsEl.innerHTML = `<div class="group"><div class="label">Destination</div>${destButtons(S.dest)}</div>
-    <div class="group"><div class="label">Q table</div>${alphaButtons(S.alpha)}</div>
-    <p class="hint">Each arrow is <code>best_action</code> in that cell when the robot heads to ${PLACES[S.dest].name}.</p>`;
+    <div class="group"><div class="label">Q table</div>${alphaButtons(S.alpha)}</div>`;
   arrows(S.alpha, S.dest);
   const p = PLACES[S.dest]; marker(p.row, p.col, 0xffffff);
   setRunners([]);
   const t = D.tables[S.alpha];
   infoEl.innerHTML = `<div class="card"><div class="kv">
     <span>table</span><span>α = ${S.alpha}, ${D.episodes} episodes</span>
-    <span>shortest routes</span><span><b>${t.shortest}/${D.pairs}</b> pairs (all destinations)</span></div></div>`;
+    <span>shortest routes</span><span><b>${t.shortest}/${D.pairs}</b> pairs (all destinations)</span></div>
+    <p class="hint" style="margin-top:8px">Each arrow is <code>best_action(s)</code>: the action with the highest value in the <b>Q table</b> tab.</p></div>`;
   hud.textContent = `policy towards ${S.dest} · α = ${S.alpha}`;
 }
 
+// ---------- Q table (viz/qgrid.js) ----------
+const Q = window.WaiterQGrid;
+const qOf = (r, c) => D.tables[S.alpha].q[stateOf(r, c, S.dest)];
+
+function renderQ() {
+  controlsEl.innerHTML = `<div class="group"><div class="label">Destination</div>${destButtons(S.dest)}</div>
+    <div class="group"><div class="label">Q table</div>${alphaButtons(S.alpha)}</div>`;
+  setRunners([]);
+  const d = LETTERS.indexOf(S.dest);
+  const { lo, hi } = Q.draw(qgrid, { rows: D.map, dest: S.dest, qOf, sel: S.qCell });
+  qhead.innerHTML = `<span><b>α = ${S.alpha}</b> · heading to <b>${S.dest} · ${PLACES[S.dest].name}</b></span>
+    <span>states ${d * 54}–${d * 54 + 53} of 162</span>${Q.scale(lo, hi)}`;
+  layoutQ();
+  renderQInfo();
+}
+const layoutQ = () => Q.layout(qview, qhead, qgrid, ROWS, COLS);
+
+function renderQInfo() {
+  infoEl.innerHTML = Q.detail({ rows: D.map, dest: S.dest, destIndex: LETTERS.indexOf(S.dest), qOf, cell: S.qCell, placeName: l => PLACES[l].name }) +
+    `<div class="formula" style="margin-top:12px">Q(s,a) ← Q(s,a) + α·[r + γ·max Q(s′,·) − Q(s,a)]</div>
+    <p class="hint" style="margin-top:10px">Click any cell of the grid to see its row. <code>q_table.npy</code> has 162 rows (3 destinations × 54 cells) and 4 columns (↑ → ↓ ←).</p>`;
+}
+
+qgrid.addEventListener("click", e => {
+  const el = e.target.closest(".qc"); if (!el) return;
+  S.qCell = [Number(el.dataset.r), Number(el.dataset.c)];
+  qgrid.querySelectorAll(".qc.sel").forEach(x => x.classList.remove("sel")); el.classList.add("sel");
+  renderQInfo();
+});
+addEventListener("resize", layoutQ);
+
+// ---------- agent and compare ----------
 function renderAgent() {
-  controlsEl.innerHTML = `<div class="group"><div class="label">Case (real model, final attempt)</div>
-    ${btns(D.cases.map(c => [c.n, `Case ${c.n}`]), S.caseN, "case")}</div>`;
+  controlsEl.innerHTML = `<div class="group"><div class="label">Request</div>
+    ${btns(D.cases.map(c => [c.n, `Case ${c.n}`]), S.caseN, "case", "seg")}</div>`;
   const cs = D.cases[S.caseN - 1];
   const called = cs.calls.length ? cs.calls.map(t => `<code>${t.name}(${Object.values(t.args).map(v => typeof v === "string" ? `"${v}"` : v).join(", ")})</code>`).join(", ") : "none";
   const thai = /[฀-๿]/.test(cs.answer);
@@ -242,7 +336,7 @@ function renderAgent() {
 
 function renderCompare(err) {
   controlsEl.innerHTML = `<div class="group"><div class="label">Destination</div>${destButtons(S.cmpDest)}</div>
-    <p class="hint">Click a free floor cell to set the start. Both tables run from the same cell.</p>`;
+    <p class="hint" style="margin-top:8px">Click a free floor cell to set the start. Both tables run from the same cell.</p>`;
   const [r, c] = S.cmpStart;
   const bad = err || invalidStart(r, c, S.cmpDest);
   if (bad) { infoEl.innerHTML = `<div class="card"><p><b>ValueError</b></p><p><code>${esc(bad)}</code></p></div>`; setRunners([]); return; }
@@ -251,17 +345,21 @@ function renderCompare(err) {
   const p = PLACES[S.cmpDest]; marker(p.row, p.col, 0xffffff);
   setRunners([new Runner(robotA, ra.path, -0.14), new Runner(robotB, rb.path, 0.14)]);
   infoEl.innerHTML = `<div class="card">${routeCard(ra, S.cmpDest, S.cmpStart, "0.5")}</div>
-    <div class="card">${routeCard(rb, S.cmpDest, S.cmpStart, "0.1")}</div>
+    <div class="card" style="margin-top:10px">${routeCard(rb, S.cmpDest, S.cmpStart, "0.1")}</div>
     <p style="margin-top:10px"><button id="replay">Replay</button></p>`;
   $("replay").onclick = () => renderCompare();
 }
 
-document.getElementById("tabs").onclick = e => { const m = e.target.dataset?.mode; if (m) { S.mode = m; render(); } };
-document.getElementById("panel").addEventListener("click", e => {
+$("tabs").onclick = e => { const m = e.target.closest("button")?.dataset.mode; if (m) { S.mode = m; render(); } };
+$("side").addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b) return;
   if (b.dataset.dest) { if (S.mode === "compare") S.cmpDest = b.dataset.dest; else S.dest = b.dataset.dest; render(); }
   if (b.dataset.alpha) { S.alpha = b.dataset.alpha; render(); }
   if (b.dataset.case) { S.caseN = Number(b.dataset.case); render(); }
+});
+addEventListener("keydown", e => {  // 1-5 switch tabs
+  const m = Object.keys(MODES)[Number(e.key) - 1];
+  if (m && !e.ctrlKey && !e.metaKey && !e.altKey) { S.mode = m; render(); }
 });
 
 // picking cells
@@ -297,6 +395,7 @@ const clock = new THREE.Clock();
 const tmp = new THREE.Vector3();
 renderer.setAnimationLoop(() => {
   const dt = Math.min(clock.getDelta(), 0.05);
+  if (S.mode === "q") return;  // the Q grid covers the 3D view
   S.runners.forEach(r => r.update(dt));
   if ((S.mode === "route" || S.mode === "compare") && S.runners.length) {
     hud.textContent = S.runners.map(r => `${r.robot === robotA ? "α 0.5" : "α 0.1"}: step ${r.step}/${r.path.length - 1}`).join(" · ");
@@ -313,8 +412,8 @@ renderer.setAnimationLoop(() => {
   renderer.render(scene, camera);
 });
 
-const fromHash = location.hash.slice(1);  // e.g. index.html#compare opens that mode
-if (["route", "policy", "agent", "compare"].includes(fromHash)) S.mode = fromHash;
+const fromHash = location.hash.slice(1);  // e.g. index.html#q opens that tab
+if (fromHash in MODES) S.mode = fromHash;
 render();
 </script>
 </body>
